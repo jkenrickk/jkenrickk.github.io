@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydrologic Flow Regimes in Manitoba</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a1628;
+    --deep: #0d2145;
+    --mid: #1a4a7a;
+    --sky: #3b82c4;
+    --aqua: #5bc4d4;
+    --foam: #c8eef7;
+    --mist: #e8f5fb;
+    --paper: #f4f9fc;
+    --gold: #c9a84c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    background: var(--ink);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero-waves {
+    position: absolute;
+    inset: 0;
+    opacity: 0.12;
+  }
+
+  .hero-waves svg { width: 100%; height: 100%; }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(91,196,212,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,196,212,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 8vw 10vw;
+    max-width: 1400px;
+  }
+
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    color: var(--aqua);
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 6vw, 6rem);
+    font-weight: 900;
+    line-height: 1.0;
+    color: #fff;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.4s forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--aqua);
+  }
+
+  .hero-sub {
+    font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+    font-weight: 300;
+    color: rgba(200,238,247,0.7);
+    max-width: 600px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.6s forwards;
+  }
+
+  .hero-authors {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: rgba(200,238,247,0.5);
+    letter-spacing: 0.1em;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.8s forwards;
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(200,238,247,0.4);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    animation: fadeUp 1s 1.2s both;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--aqua), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: clamp(5rem, 10vw, 10rem) clamp(2rem, 8vw, 10vw);
+  }
+
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-tag::before {
+    content: '';
+    display: block;
+    width: 2.5rem;
+    height: 1px;
+    background: var(--sky);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--deep);
+    margin-bottom: 2.5rem;
+  }
+
+  /* ── RELEVANCE ── */
+  .relevance {
+    background: var(--mist);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .relevance::before {
+    content: 'WATER';
+    position: absolute;
+    right: -2rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    font-family: 'Playfair Display', serif;
+    font-size: 14rem;
+    font-weight: 900;
+    color: rgba(91,196,212,0.06);
+    letter-spacing: -0.05em;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr; gap: 3rem; }
+  }
+
+  .body-text {
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    line-height: 1.9;
+    font-weight: 300;
+    color: #2a3f5f;
+  }
+
+  .body-text + .body-text { margin-top: 1.2rem; }
+
+  .def-card {
+    background: #fff;
+    border: 1px solid rgba(59,130,196,0.15);
+    border-left: 3px solid var(--sky);
+    padding: 2rem 2.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .def-card h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--deep);
+    margin-bottom: 0.6rem;
+  }
+
+  .def-card p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4a6080;
+    font-weight: 300;
+  }
+
+  .bfi-formula {
+    background: var(--deep);
+    color: #fff;
+    padding: 2rem 2.5rem;
+    text-align: center;
+  }
+
+  .bfi-formula .formula {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-style: italic;
+    color: var(--aqua);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .bfi-formula .formula .frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .bfi-formula .formula .frac span:first-child {
+    border-bottom: 1px solid var(--aqua);
+    padding-bottom: 0.3rem;
+  }
+
+  /* ── QUESTIONS ── */
+  .questions {
+    background: var(--deep);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .questions .section-title { color: #fff; }
+  .questions .section-tag { color: var(--aqua); }
+  .questions .section-tag::before { background: var(--aqua); }
+
+  .q-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .q-list { grid-template-columns: 1fr; }
+  }
+
+  .q-item {
+    border: 1px solid rgba(91,196,212,0.2);
+    padding: 2.5rem;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+
+  .q-item:hover { border-color: var(--aqua); }
+
+  .q-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: rgba(91,196,212,0.12);
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    line-height: 1;
+  }
+
+  .q-item p {
+    font-size: clamp(1rem, 1.3vw, 1.2rem);
+    line-height: 1.7;
+    font-weight: 300;
+    color: rgba(200,238,247,0.85);
+  }
+
+  /* ── DATA ── */
+  .data-section { background: #fff; }
+
+  .stats-row {
+    display: flex;
+    gap: 3rem;
+    margin: 3rem 0;
+    flex-wrap: wrap;
+  }
+
+  .stat-block {
+    flex: 1;
+    min-width: 160px;
+    border-top: 2px solid var(--sky);
+    padding-top: 1.2rem;
+  }
+
+  .stat-block .big {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 4vw, 3.5rem);
+    font-weight: 900;
+    color: var(--deep);
+    line-height: 1;
+  }
+
+  .stat-block .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: var(--sky);
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+  }
+
+  .feature-list {
+    list-style: none;
+    margin-top: 2rem;
+  }
+
+  .feature-list li {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(59,130,196,0.1);
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    font-size: 1rem;
+    font-weight: 300;
+    color: #2a3f5f;
+  }
+
+  .feature-list li .fi {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    background: var(--foam);
+    color: var(--sky);
+    padding: 0.25rem 0.6rem;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+  }
+
+  /* ── METHODS ── */
+  .methods { background: var(--ink); }
+  .methods .section-title { color: #fff; }
+  .methods .section-tag { color: var(--aqua); }
+  .methods .section-tag::before { background: var(--aqua); }
+
+  .methods-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 3rem;
+    background: rgba(91,196,212,0.1);
+  }
+
+  @media (max-width: 768px) {
+    .methods-grid { grid-template-columns: 1fr; }
+  }
+
+  .method-card {
+    background: var(--ink);
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s;
+  }
+
+  .method-card:hover { background: var(--deep); }
+
+  .method-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--aqua), transparent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s;
+  }
+
+  .method-card:hover::before { transform: scaleX(1); }
+
+  .method-icon {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: rgba(91,196,212,0.15);
+    margin-bottom: 1.5rem;
+    line-height: 1;
+  }
+
+  .method-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--aqua);
+    margin-bottom: 1rem;
+  }
+
+  .method-card p {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    font-weight: 300;
+    color: rgba(200,238,247,0.6);
+  }
+
+  /* ── RESULTS ── */
+  .results { background: var(--mist); }
+
+  .results-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid rgba(59,130,196,0.2);
+  }
+
+  .tab-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8aaccc;
+    padding: 1rem 1.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.25s;
+  }
+
+  .tab-btn.active, .tab-btn:hover {
+    color: var(--deep);
+    border-bottom-color: var(--sky);
+  }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .result-block {
+    background: #fff;
+    border: 1px solid rgba(59,130,196,0.12);
+    padding: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .result-block h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--deep);
+    margin-bottom: 1rem;
+  }
+
+  .result-block p {
+    font-size: 1rem;
+    line-height: 1.8;
+    font-weight: 300;
+    color: #3a5070;
+  }
+
+  .metric-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .metric {
+    flex: 1;
+    min-width: 120px;
+    background: var(--mist);
+    padding: 1rem 1.2rem;
+    text-align: center;
+  }
+
+  .metric .val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--sky);
+  }
+
+  .metric .key {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: #8aaccc;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  /* Cluster dots */
+  .cluster-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  .cluster-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    background: var(--mist);
+    padding: 0.8rem 1.3rem;
+  }
+
+  .cluster-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .cluster-badge p {
+    font-size: 0.88rem;
+    color: #3a5070;
+    font-weight: 400;
+    margin: 0 !important;
+  }
+
+  /* BFI Table */
+  .bfi-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin-top: 1.5rem;
+  }
+
+  .bfi-table thead tr {
+    background: var(--deep);
+    color: #fff;
+  }
+
+  .bfi-table th {
+    padding: 0.9rem 1rem;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+
+  .bfi-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(59,130,196,0.08);
+    color: #2a3f5f;
+    font-weight: 300;
+  }
+
+  .bfi-table tr:hover td { background: var(--foam); }
+
+  .bfi-bar {
+    height: 6px;
+    background: linear-gradient(90deg, var(--sky), var(--aqua));
+    border-radius: 2px;
+  }
+
+  /* ── CONCLUSION ── */
+  .conclusion { background: var(--deep); overflow: hidden; position: relative; }
+
+  .conclusion::after {
+    content: '';
+    position: absolute;
+    bottom: -20rem;
+    right: -20rem;
+    width: 60rem;
+    height: 60rem;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(91,196,212,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .conclusion .section-title { color: #fff; }
+  .conclusion .section-tag { color: var(--aqua); }
+  .conclusion .section-tag::before { background: var(--aqua); }
+
+  .conclusion-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 768px) {
+    .conclusion-grid { grid-template-columns: 1fr; }
+  }
+
+  .concl-card {
+    border: 1px solid rgba(91,196,212,0.15);
+    padding: 2.5rem;
+  }
+
+  .concl-card h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--aqua);
+    margin-bottom: 1.2rem;
+  }
+
+  .concl-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .concl-card li {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    font-weight: 300;
+    color: rgba(200,238,247,0.7);
+    padding-left: 1.2rem;
+    position: relative;
+  }
+
+  .concl-card li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--aqua);
+    opacity: 0.5;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    padding: 3rem clamp(2rem, 8vw, 10vw);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    border-top: 1px solid rgba(91,196,212,0.1);
+  }
+
+  footer p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: rgba(200,238,247,0.3);
+  }
+
+  footer .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(200,238,247,0.4);
+    font-style: italic;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-waves">
+    <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,300 C240,200 480,400 720,300 C960,200 1200,400 1440,300 L1440,800 L0,800 Z" fill="rgba(91,196,212,0.4)"/>
+      <path d="M0,450 C360,350 720,550 1080,450 C1260,400 1380,480 1440,450 L1440,800 L0,800 Z" fill="rgba(59,130,196,0.3)"/>
+      <path d="M0,600 C200,550 400,650 600,600 C800,550 1100,680 1440,600 L1440,800 L0,800 Z" fill="rgba(26,74,122,0.5)"/>
+    </svg>
+  </div>
+  <div class="hero-content">
+    <p class="hero-label">Hydrological Sciences · Manitoba, Canada · 2000–2009</p>
+    <h1 class="hero-title">Hydrologic Flow<br>Regimes in <em>Manitoba</em></h1>
+    <p class="hero-sub">Understanding streamflow–baseflow relationships across river systems using PCA, K-Means clustering, and deep learning.</p>
+    <p class="hero-authors">Jonassen Kenrick &nbsp;·&nbsp; Shawn Gabriel Intong</p>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<!-- RELEVANCE -->
+<section class="relevance">
+  <div class="section-tag">Background</div>
+  <h2 class="section-title reveal">Why does it matter?</h2>
+  <div class="two-col">
+    <div class="reveal">
+      <p class="body-text">Rivers in Manitoba play a central role in water supply, ecological stability, agriculture, and flood management. The province faces increasing pressure from climate variability, agricultural expansion, and changing groundwater recharge patterns.</p>
+      <p class="body-text" style="margin-top:1.2rem">Understanding the relationship between total streamflow and the slower, groundwater-sustained baseflow component is key to assessing long-term regional water security and ecological resilience.</p>
+    </div>
+    <div class="reveal">
+      <div class="def-card">
+        <h4>Streamflow</h4>
+        <p>The total amount of water moving through a river at any given time — including surface runoff, interflow, and groundwater contributions.</p>
+      </div>
+      <div class="def-card">
+        <h4>Baseflow</h4>
+        <p>The sustained groundwater-fed portion of streamflow that maintains river levels during dry periods, reflecting aquifer connectivity.</p>
+      </div>
+      <div class="bfi-formula">
+        <p style="font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;color:rgba(200,238,247,0.5);margin-bottom:1rem;text-transform:uppercase">Baseflow Index</p>
+        <div class="formula">
+          BFI =&nbsp;
+          <span class="frac">
+            <span>baseflow</span>
+            <span>streamflow</span>
+          </span>
+        </div>
+        <p style="font-size:0.82rem;color:rgba(200,238,247,0.45);margin-top:1rem;font-family:'DM Mono',monospace">Higher BFI → stable, groundwater-supported system</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH QUESTIONS -->
+<section class="questions">
+  <div class="section-tag">Research Questions</div>
+  <h2 class="section-title reveal">What we set out to answer</h2>
+  <div class="q-list">
+    <div class="q-item reveal">
+      <span class="q-num">01</span>
+      <p>What are the main patterns and relationships between streamflow and baseflow across different hydrological stations in Manitoba?</p>
+    </div>
+    <div class="q-item reveal">
+      <span class="q-num">02</span>
+      <p>How do variations in these flow characteristics reflect differences in watershed behavior and flow regime stability across Manitoba?</p>
+    </div>
+  </div>
+</section>
+
+<!-- DATA -->
+<section class="data-section">
+  <div class="section-tag">Dataset</div>
+  <h2 class="section-title reveal">The Data</h2>
+  <p class="body-text reveal" style="max-width:620px">Daily streamflow and baseflow records were retrieved from the Government of Canada's Water Office for 10 stations across Manitoba, spanning January 2000 to December 2009.</p>
+  <div class="stats-row reveal">
+    <div class="stat-block">
+      <div class="big">36,500</div>
+      <div class="label">Total Records</div>
+    </div>
+    <div class="stat-block">
+      <div class="big">10</div>
+      <div class="label">Stations</div>
+    </div>
+    <div class="stat-block">
+      <div class="big">10 yrs</div>
+      <div class="label">Time Span</div>
+    </div>
+    <div class="stat-block">
+      <div class="big">3</div>
+      <div class="label">Features</div>
+    </div>
+  </div>
+  <div class="two-col" style="gap:4rem">
+    <div class="reveal">
+      <ul class="feature-list">
+        <li><span class="fi">date</span> Timestamp of each daily measurement</li>
+        <li><span class="fi">streamflow</span> Total daily flow (cubic feet per second)</li>
+        <li><span class="fi">baseflow</span> Groundwater-sustained flow (cubic feet per second)</li>
+      </ul>
+    </div>
+    <div class="reveal">
+      <p class="body-text">Hydrological indicators were then engineered from the raw series: <strong>BFI</strong>, <strong>Flashiness</strong> (Richards-Baker index), <strong>Flow Quantiles</strong> (Q10, Q50, Q90), and a <strong>Seasonality Index</strong> — forming the feature matrix for PCA and clustering.</p>
+    </div>
+  </div>
+</section>
+
+<!-- METHODS -->
+<section class="methods">
+  <div class="section-tag">Methodology</div>
+  <h2 class="section-title reveal">Four analytical lenses</h2>
+  <div class="methods-grid reveal">
+    <div class="method-card">
+      <div class="method-icon">PCA</div>
+      <h3>Principal Component Analysis</h3>
+      <p>Condensed six correlated hydrologic variables into independent components. PC1 captures flow magnitude (Q10/Q50/Q90); PC2 captures variability vs. stability (Flashiness + Seasonality). Together they explain ~81% of total variance.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">K⟨⟩</div>
+      <h3>K-Means Clustering</h3>
+      <p>Grouped the 10 stations into three interpretable hydrologic types based on PCA scores — revealing spatial gradients from high-BFI Shield rivers in the north to flashier prairie clay-basin systems in the south.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">MLP</div>
+      <h3>MLP Neural Network</h3>
+      <p>Feed-forward network using the previous 7 days of streamflow to predict next-day flow. Achieves RMSE of 0.15–0.55 units depending on station, capturing short-term trends and recession limbs.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">LSTM</div>
+      <h3>Long Short-Term Memory</h3>
+      <p>Sequential model with memory cells, receiving a 7-day input window. Outperforms MLP by capturing recession curves, seasonal cycles, and long-range temporal dependencies inherent in hydrologic time series.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="results">
+  <div class="section-tag">Results</div>
+  <h2 class="section-title reveal">Key Findings</h2>
+  <div class="results-tabs reveal">
+    <button class="tab-btn active" onclick="switchTab('pca')">PCA</button>
+    <button class="tab-btn" onclick="switchTab('kmeans')">K-Means</button>
+    <button class="tab-btn" onclick="switchTab('bfi')">BFI Table</button>
+    <button class="tab-btn" onclick="switchTab('models')">Models</button>
+  </div>
+
+  <!-- PCA Tab -->
+  <div class="tab-pane active" id="tab-pca">
+    <div class="result-block">
+      <h4>PC1 — Flow Magnitude Axis</h4>
+      <p>Q10, Q50, and Q90 all load strongly and equally on PC1 (~+0.54 each), confirming that stations differ primarily in their overall discharge volume rather than the shape of their flow distributions.</p>
+      <div class="metric-row">
+        <div class="metric"><div class="val">+0.537</div><div class="key">Q10 loading</div></div>
+        <div class="metric"><div class="val">+0.544</div><div class="key">Q50 loading</div></div>
+        <div class="metric"><div class="val">+0.540</div><div class="key">Q90 loading</div></div>
+      </div>
+    </div>
+    <div class="result-block">
+      <h4>PC2 — Variability vs. Stability Axis</h4>
+      <p>Flashiness dominates PC2 (+0.765), joined by Seasonality (+0.445). BFI loads negatively (−0.465), confirming that high-BFI rivers sit at the stable end of this axis. Together the two components explain ~81% of total variance.</p>
+      <div class="metric-row">
+        <div class="metric"><div class="val">+0.765</div><div class="key">Flashiness</div></div>
+        <div class="metric"><div class="val">+0.445</div><div class="key">Seasonality</div></div>
+        <div class="metric"><div class="val">−0.465</div><div class="key">BFI</div></div>
+        <div class="metric"><div class="val">~81%</div><div class="key">Variance explained</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- K-Means Tab -->
+  <div class="tab-pane" id="tab-kmeans">
+    <div class="result-block">
+      <h4>Three Hydrologic Clusters</h4>
+      <p>K-means identified three distinct station groups that map cleanly onto interpretable landscape types across Manitoba.</p>
+      <div class="cluster-row">
+        <div class="cluster-badge">
+          <div class="cluster-dot" style="background:#4a90c4"></div>
+          <p><strong>Cluster 0 (Blue)</strong> — Moderate-to-high BFI, stable flow, moderate discharge. Groundwater-connected systems.</p>
+        </div>
+        <div class="cluster-badge">
+          <div class="cluster-dot" style="background:#e07b30"></div>
+          <p><strong>Cluster 1 (Orange)</strong> — High-discharge stations with strong seasonal signals and lower variability index.</p>
+        </div>
+        <div class="cluster-badge">
+          <div class="cluster-dot" style="background:#4caf50"></div>
+          <p><strong>Cluster 2 (Green)</strong> — Lower BFI, flashier flow regimes, more event-driven variability.</p>
+        </div>
+      </div>
+    </div>
+    <div class="result-block">
+      <h4>Spatial Interpretation</h4>
+      <p>Northern stations (e.g., 05RB003 Bloodvein River, BFI = 0.995) cluster near permeable Shield bedrock with high groundwater recharge. Southern prairie stations (e.g., 05OF003 Boyne River, BFI = 0.577) sit in clay-rich basins dominated by surface runoff — two ends of the same hydrologic spectrum.</p>
+    </div>
+  </div>
+
+  <!-- BFI Table Tab -->
+  <div class="tab-pane" id="tab-bfi">
+    <div class="result-block" style="overflow-x:auto">
+      <h4>Hydrological Indicators by Station</h4>
+      <p style="margin-bottom:0">High-BFI rivers exhibit strong groundwater contributions and sustained flow; low-BFI rivers rely more heavily on event-driven runoff.</p>
+      <table class="bfi-table">
+        <thead>
+          <tr>
+            <th>Station ID</th>
+            <th>BFI</th>
+            <th>BFI Bar</th>
+            <th>Flashiness</th>
+            <th>Q50</th>
+            <th>Seasonality</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>05RB003</td><td>0.995</td><td><div class="bfi-bar" style="width:99.5%"></div></td><td>0.439</td><td>0.242</td><td>1.927</td></tr>
+          <tr><td>05MJ001</td><td>0.993</td><td><div class="bfi-bar" style="width:99.3%"></div></td><td>0.445</td><td>0.863</td><td>1.926</td></tr>
+          <tr><td>05PJ001</td><td>0.889</td><td><div class="bfi-bar" style="width:88.9%"></div></td><td>0.452</td><td>0.481</td><td>1.992</td></tr>
+          <tr><td>05MJ003</td><td>0.865</td><td><div class="bfi-bar" style="width:86.5%"></div></td><td>0.445</td><td>0.479</td><td>1.906</td></tr>
+          <tr><td>05ME001</td><td>0.857</td><td><div class="bfi-bar" style="width:85.7%"></div></td><td>0.449</td><td>0.332</td><td>1.971</td></tr>
+          <tr><td>05MH005</td><td>0.853</td><td><div class="bfi-bar" style="width:85.3%"></div></td><td>0.430</td><td>0.537</td><td>1.850</td></tr>
+          <tr><td>05MH001</td><td>0.818</td><td><div class="bfi-bar" style="width:81.8%"></div></td><td>0.436</td><td>0.753</td><td>1.858</td></tr>
+          <tr><td>05SA002</td><td>0.736</td><td><div class="bfi-bar" style="width:73.6%"></div></td><td>0.459</td><td>0.566</td><td>1.911</td></tr>
+          <tr><td>05OA007</td><td>0.644</td><td><div class="bfi-bar" style="width:64.4%"></div></td><td>0.447</td><td>0.688</td><td>1.921</td></tr>
+          <tr><td>05OF003</td><td>0.577</td><td><div class="bfi-bar" style="width:57.7%"></div></td><td>0.458</td><td>0.637</td><td>1.893</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Models Tab -->
+  <div class="tab-pane" id="tab-models">
+    <div class="result-block">
+      <h4>MLP Neural Network Performance</h4>
+      <p>The feed-forward MLP captured short-term flow trends and recession limbs reasonably well. RMSE ranged from 0.15 to 0.55 streamflow units depending on the station. Errors were highest during sharp spike events, which the model tended to smooth over.</p>
+      <div class="metric-row">
+        <div class="metric"><div class="val">0.15–0.55</div><div class="key">RMSE range</div></div>
+        <div class="metric"><div class="val">7-day</div><div class="key">Input window</div></div>
+        <div class="metric"><div class="val">Next-day</div><div class="key">Forecast horizon</div></div>
+      </div>
+    </div>
+    <div class="result-block">
+      <h4>LSTM Network Performance</h4>
+      <p>LSTMs provided consistently stronger predictions by leveraging temporal memory across the 7-day window. They captured seasonal recession curves and gradual baseflow drawdown far better than the MLP — particularly for high-BFI stations with pronounced seasonal cycles. RMSE improved modestly but consistently across all 10 stations.</p>
+      <div class="metric-row">
+        <div class="metric"><div class="val">↓ RMSE</div><div class="key">vs. MLP</div></div>
+        <div class="metric"><div class="val">Seasonal</div><div class="key">Cycles captured</div></div>
+        <div class="metric"><div class="val">All 10</div><div class="key">Stations improved</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONCLUSION -->
+<section class="conclusion">
+  <div class="section-tag">Conclusion</div>
+  <h2 class="section-title reveal">Summary of findings</h2>
+  <div class="conclusion-grid reveal">
+    <div class="concl-card">
+      <h4>Streamflow–Baseflow Patterns</h4>
+      <ul>
+        <li>BFI values ranged widely from 0.577 (Boyne River) to 0.995 (Bloodvein River), reflecting major differences in groundwater connectivity across Manitoba's landscape.</li>
+        <li>High-BFI stations maintain stable, sustained flows year-round, while low-BFI stations display flashier, precipitation-driven dynamics.</li>
+        <li>PCA revealed that flow magnitude and flow variability operate as two largely independent axes of variation.</li>
+      </ul>
+    </div>
+    <div class="concl-card">
+      <h4>Watershed Behavior & Predictability</h4>
+      <ul>
+        <li>K-means clustering confirmed three ecologically meaningful hydrologic types aligned with Manitoba's geology — from permeable Shield bedrock to prairie clay basins.</li>
+        <li>LSTM outperformed MLP across all stations, validating the importance of temporal memory in hydrologic forecasting.</li>
+        <li>Stable, groundwater-supported rivers are more predictable; flashier prairie systems demand models that handle abrupt non-linearities.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="logo-text">Manitoba Hydrology</span>
+  <p>Jonassen Kenrick &nbsp;·&nbsp; Shawn Gabriel Intong</p>
+  <p>Data: Environment and Climate Change Canada · Water Office</p>
+</footer>
+
+<script>
+  // Tab switching
+  function switchTab(id) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
