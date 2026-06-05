@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fagus sylvatica & Tetrahymena — BIOL 342</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --forest:  #1c3a1e;
+  --canopy:  #2d5a30;
+  --leaf:    #3d7a40;
+  --moss:    #5a9e5e;
+  --fern:    #7bbf7f;
+  --sage:    #a8d4a8;
+  --mist:    #dff0df;
+  --snow:    #f2f8f2;
+  --bark:    #5c3d1e;
+  --tan:     #c8a87a;
+  --cream:   #faf6ef;
+  --amber:   #d4943a;
+  --gold:    #e8c46a;
+  --ink:     #1a2414;
+  --cell:    #7b3fa0;
+  --cell2:   #a06030;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  background: var(--forest);
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* organic leaf blobs background */
+.hero-blobs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero-blobs svg { width:100%; height:100%; }
+
+/* leaf scatter */
+.leaf-scatter {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.leaf {
+  position: absolute;
+  opacity: 0;
+  animation: leaffall ease-in-out infinite;
+}
+@keyframes leaffall {
+  0%   { transform: translateY(-80px) rotate(0deg) scale(0.8); opacity:0; }
+  15%  { opacity: 0.25; }
+  85%  { opacity: 0.15; }
+  100% { transform: translateY(110vh) rotate(420deg) scale(1.1); opacity:0; }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: clamp(6rem,10vw,9rem) clamp(2rem,7vw,8rem);
+  max-width: 1300px;
+  width: 100%;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(90,158,94,0.2);
+  border: 1px solid rgba(90,158,94,0.35);
+  padding: 0.4rem 1rem;
+  margin-bottom: 2.5rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  color: var(--fern);
+  text-transform: uppercase;
+  opacity: 0;
+  animation: up 0.8s 0.3s forwards;
+}
+.hero-badge::before {
+  content: ''; width:6px; height:6px; border-radius:50%;
+  background: var(--gold); flex-shrink:0;
+}
+
+.hero-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2.5rem, 5.5vw, 5.5rem);
+  font-weight: 900;
+  line-height: 1.02;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: up 0.9s 0.5s forwards;
+}
+.hero-title em { font-style: italic; color: var(--gold); }
+
+.hero-sub {
+  font-size: clamp(1rem,1.5vw,1.2rem);
+  font-weight: 300;
+  color: rgba(168,212,168,0.75);
+  max-width: 580px;
+  line-height: 1.75;
+  margin-bottom: 3.5rem;
+  font-style: italic;
+  opacity: 0;
+  animation: up 0.9s 0.7s forwards;
+}
+
+.hero-authors {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: up 0.9s 0.9s forwards;
+}
+.author {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: rgba(168,212,168,0.6);
+  text-transform: uppercase;
+}
+
+.hero-stat-strip {
+  position: absolute;
+  right: clamp(2rem,6vw,7rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  opacity: 0;
+  animation: up 1s 1.1s forwards;
+}
+@media(max-width:900px){ .hero-stat-strip{ display:none; } }
+
+.hstat {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(90,158,94,0.2);
+  padding: 1.5rem 2rem;
+  text-align: center;
+  min-width: 150px;
+}
+.hstat .val {
+  font-family: 'Fraunces', serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+.hstat .key {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  color: rgba(168,212,168,0.5);
+  text-transform: uppercase;
+  margin-top: 0.4rem;
+}
+
+/* ── SHARED ── */
+section { padding: clamp(5rem,9vw,9rem) clamp(2rem,7vw,8rem); }
+
+.tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--leaf);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.tag::before { content:''; width:2rem; height:1px; background:var(--leaf); }
+
+.h2 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2rem,3.5vw,3.2rem);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--forest);
+  margin-bottom: 2.8rem;
+}
+
+.body-t { font-size:clamp(0.95rem,1.2vw,1.1rem); line-height:1.85; font-weight:300; color:#3a4a30; }
+
+/* ── INTRO ── */
+.intro-section { background: var(--snow); }
+
+.intro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: start;
+}
+@media(max-width:768px){ .intro-grid{ grid-template-columns:1fr; gap:3rem; } }
+
+.objective-box {
+  background: var(--forest);
+  color: #fff;
+  padding: 2.5rem 3rem;
+  position: relative;
+  overflow: hidden;
+}
+.objective-box::before {
+  content: '';
+  position: absolute;
+  top: -3rem; right: -3rem;
+  width: 10rem; height: 10rem;
+  border-radius: 50%;
+  background: rgba(90,158,94,0.15);
+}
+.objective-box h3 {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--fern);
+  text-transform: uppercase;
+  margin-bottom: 1.2rem;
+}
+.objective-box p {
+  font-size: 1rem;
+  line-height: 1.8;
+  font-weight: 300;
+  color: rgba(255,255,255,0.85);
+}
+.objective-box p em { font-style: italic; color: var(--gold); }
+
+.species-cards { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.species-card {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid rgba(61,122,64,0.12);
+  border-left: 3px solid var(--leaf);
+  padding: 1.8rem 2rem;
+  transition: border-left-color 0.3s;
+}
+.species-card:hover { border-left-color: var(--amber); }
+.species-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 0.2rem;
+}
+.species-card h4 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--forest);
+  margin-bottom: 0.5rem;
+}
+.species-card p { font-size: 0.9rem; line-height: 1.7; font-weight: 300; color: #5a6a50; }
+
+/* ── METHODS ── */
+.methods-section { background: #fff; }
+
+.pipeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: rgba(61,122,64,0.1);
+  margin-bottom: 3rem;
+}
+@media(max-width:900px){ .pipeline{ grid-template-columns:1fr 1fr; } }
+@media(max-width:550px){ .pipeline{ grid-template-columns:1fr; } }
+
+.pipe-step {
+  background: var(--snow);
+  padding: 2.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.pipe-step:hover { background: var(--mist); }
+.pipe-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  color: var(--moss);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.pipe-step h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--forest);
+  margin-bottom: 0.7rem;
+}
+.pipe-step p { font-size: 0.85rem; line-height: 1.7; font-weight: 300; color: #5a6a50; }
+
+.conc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin-top: 0.5rem;
+}
+.conc-table thead tr { background: var(--forest); }
+.conc-table th {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--sage);
+  font-weight: 400;
+}
+.conc-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(61,122,64,0.08);
+  color: #3a4a30;
+  font-weight: 300;
+}
+.conc-table tr:hover td { background: var(--snow); }
+.conc-table .row-label { font-weight: 500; color: var(--forest); }
+
+/* ── RESULTS ── */
+.results-section { background: var(--mist); }
+
+.slope-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+@media(max-width:900px){ .slope-grid{ grid-template-columns:1fr 1fr; } }
+@media(max-width:550px){ .slope-grid{ grid-template-columns:1fr; } }
+
+.slope-card {
+  background: #fff;
+  border: 1px solid rgba(61,122,64,0.12);
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.slope-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(28,58,30,0.08); }
+
+.slope-conc {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--moss);
+  margin-bottom: 1.2rem;
+}
+.slope-val {
+  font-family: 'Fraunces', serif;
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.slope-unit {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  color: rgba(61,122,64,0.5);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* color the slopes by concentration */
+.sc-0 .slope-val  { color: var(--leaf); }
+.sc-06 .slope-val { color: var(--moss); }
+.sc-12 .slope-val { color: var(--amber); }
+.sc-18 .slope-val { color: var(--bark); }
+
+/* slope trend bar */
+.slope-bar-wrap { margin: 1.2rem 0 0.4rem; height: 6px; background: rgba(61,122,64,0.1); }
+.slope-bar { height: 100%; background: linear-gradient(90deg, var(--leaf), var(--fern)); }
+
+.anova-banner {
+  background: var(--forest);
+  color: #fff;
+  padding: 2rem 3rem;
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+.anova-num {
+  font-family: 'Fraunces', serif;
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+  flex-shrink: 0;
+}
+.anova-text h4 {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: var(--fern);
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.anova-text p { font-size: 0.95rem; line-height: 1.7; font-weight: 300; color: rgba(255,255,255,0.75); }
+
+.trend-note {
+  background: #fff;
+  border-left: 3px solid var(--amber);
+  padding: 1.5rem 2rem;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: #3a4a30;
+  font-weight: 300;
+}
+.trend-note strong { color: var(--forest); font-weight: 600; }
+
+/* ── DISCUSSION ── */
+.disc-section { background: var(--canopy); }
+.disc-section .h2 { color: #fff; }
+.disc-section .tag { color: var(--sage); }
+.disc-section .tag::before { background: var(--sage); }
+
+.disc-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+@media(max-width:700px){ .disc-cols{ grid-template-columns:1fr; } }
+
+.disc-card {
+  border: 1px solid rgba(168,212,168,0.15);
+  padding: 2.5rem;
+  transition: background 0.3s;
+}
+.disc-card:hover { background: rgba(168,212,168,0.04); }
+.disc-card h3 {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+}
+.disc-card ul { list-style:none; display:flex; flex-direction:column; gap:0.9rem; }
+.disc-card li {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  font-weight: 300;
+  color: rgba(223,240,223,0.75);
+  padding-left: 1.3rem;
+  position: relative;
+}
+.disc-card li::before { content:'→'; position:absolute; left:0; color:var(--fern); opacity:0.6; font-family:'Space Mono',monospace; font-size:0.75rem; top:0.1rem; }
+
+/* ── CONCLUSION ── */
+.concl-section { background: var(--snow); }
+
+.concl-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+@media(max-width:700px){ .concl-main{ grid-template-columns:1fr; } }
+
+.concl-finding {
+  background: #fff;
+  border-top: 3px solid var(--leaf);
+  padding: 2.5rem;
+  transition: border-top-color 0.3s;
+}
+.concl-finding:hover { border-top-color: var(--gold); }
+.concl-finding h4 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--forest);
+  margin-bottom: 0.8rem;
+}
+.concl-finding p { font-size: 0.9rem; line-height: 1.75; font-weight: 300; color: #4a5a40; }
+
+.future-box {
+  background: var(--forest);
+  color: #fff;
+  padding: 2.5rem 3rem;
+}
+.future-box h4 {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+}
+.future-list { list-style: none; display: flex; flex-direction: column; gap: 0.9rem; }
+.future-list li {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  font-weight: 300;
+  color: rgba(255,255,255,0.75);
+  padding-left: 1.3rem;
+  position: relative;
+}
+.future-list li::before { content:'◆'; position:absolute; left:0; color:var(--fern); font-size:0.5rem; top:0.35rem; }
+
+/* ── ACKNOWLEDGE ── */
+.ack-section { background: var(--mist); }
+.ack-box {
+  background: #fff;
+  border: 1px solid rgba(61,122,64,0.12);
+  padding: 2.5rem 3rem;
+  max-width: 700px;
+}
+.ack-box h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--forest);
+  margin-bottom: 1rem;
+}
+.ack-box p { font-size: 0.9rem; line-height: 1.8; font-weight: 300; color: #4a5a40; }
+.ack-box .team { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.name-pill {
+  background: var(--mist);
+  border: 1px solid rgba(61,122,64,0.15);
+  padding: 0.3rem 0.8rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--leaf);
+  letter-spacing: 0.05em;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--forest);
+  padding: 2.5rem clamp(2rem,7vw,8rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-top: 1px solid rgba(90,158,94,0.15);
+}
+footer p {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: rgba(168,212,168,0.3);
+}
+.footer-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 900;
+  font-style: italic;
+  color: rgba(168,212,168,0.3);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes up {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.reveal { opacity:0; transform:translateY(25px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.on { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-blobs">
+    <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="900" cy="200" rx="500" ry="350" fill="rgba(45,90,48,0.3)"/>
+      <ellipse cx="200" cy="700" rx="400" ry="280" fill="rgba(28,58,30,0.5)"/>
+      <path d="M600,0 C750,120 820,300 700,500 C580,700 400,720 300,600 C200,480 280,200 600,0Z" fill="rgba(61,122,64,0.12)"/>
+    </svg>
+  </div>
+  <div class="leaf-scatter" id="leaves"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">UBC BIOL 342 · Lab Report</div>
+    <h1 class="hero-title">The Effects of<br><em>Fagus sylvatica</em><br>Leaf Extract on<br>Tetrahymena Growth</h1>
+    <p class="hero-sub">A concentration-dependent analysis of unicellular eukaryotic growth in the presence of beech leaf phytochemicals</p>
+    <div class="hero-authors">
+      <span class="author">Yunhao Guo</span>
+      <span class="author">Jonassen Kenrick</span>
+      <span class="author">Celine Wong</span>
+    </div>
+  </div>
+
+  <div class="hero-stat-strip">
+    <div class="hstat"><div class="val">4</div><div class="key">Concentrations</div></div>
+    <div class="hstat"><div class="val">0.92</div><div class="key">ANOVA p-value</div></div>
+    <div class="hstat"><div class="val">1.42–1.53</div><div class="key">Slope range</div></div>
+  </div>
+</section>
+
+<!-- INTRODUCTION -->
+<section class="intro-section">
+  <div class="tag reveal">Introduction</div>
+  <h2 class="h2 reveal">Background & Objective</h2>
+  <div class="intro-grid">
+    <div class="reveal">
+      <div class="objective-box">
+        <h3>Objective</h3>
+        <p>Evaluate the effects of different concentrations of <em>Fagus sylvatica</em> leaf extract on the growth rate of <em>Tetrahymena</em> to determine whether beech leaf phytochemicals inhibit or promote unicellular eukaryotic proliferation in a concentration-dependent manner.</p>
+      </div>
+      <p class="body-t" style="margin-top:2rem">Beech trees produce a rich suite of secondary metabolites — polyphenols, tannins, flavonoids — that may interact with cellular growth machinery. <em>Tetrahymena thermophila</em> serves as a well-characterized model organism for toxicity and growth assays due to its rapid doubling time and sensitivity to environmental change.</p>
+    </div>
+    <div class="species-cards reveal">
+      <div class="species-card">
+        <div class="species-icon">🌿</div>
+        <div>
+          <h4>Fagus sylvatica</h4>
+          <p>European beech. Leaf extract prepared at a stock concentration of 3.6 mg/mL, then diluted to produce working concentrations of 0, 0.6, 1.2, and 1.8 mg/mL.</p>
+        </div>
+      </div>
+      <div class="species-card">
+        <div class="species-icon">🔬</div>
+        <div>
+          <h4>Tetrahymena</h4>
+          <p>Ciliated single-celled eukaryote. Working stock prepared at 2 × 10⁴ cells/mL. Growth tracked via cell counting across multiple time points over three days.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METHODS -->
+<section class="methods-section">
+  <div class="tag reveal">Methods</div>
+  <h2 class="h2 reveal">Experimental Pipeline</h2>
+  <div class="pipeline reveal">
+    <div class="pipe-step">
+      <div class="pipe-num">Step 01</div>
+      <h3>Fagus sylvatica leaf extract</h3>
+      <p>Leaves processed to produce a concentrated stock at 3.6 mg/mL. Diluted to target concentrations before use.</p>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">Step 02</div>
+      <h3>Tetrahymena stock dilution</h3>
+      <p>Original <em>Tetrahymena</em> culture diluted to working stock of 2 × 10⁴ cells/mL in appropriate media.</p>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">Step 03</div>
+      <h3>Concentrated stock prep</h3>
+      <p>Final working solutions prepared by combining leaf extract at each target concentration with <em>Tetrahymena</em> media to a 10 mL total volume.</p>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">Step 04</div>
+      <h3>Tetrahymena cell counting</h3>
+      <p>Cell concentration measured at multiple time points across Days 1–3 using haemocytometry.</p>
+    </div>
+  </div>
+
+  <div class="tag reveal" style="margin-bottom:1rem">Treatment concentrations</div>
+  <div style="overflow-x:auto" class="reveal">
+    <table class="conc-table">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>0 mg/mL</th>
+          <th>0.6 mg/mL</th>
+          <th>1.2 mg/mL</th>
+          <th>1.8 mg/mL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label">Leaf extract — mL of 3.6 mg/mL stock</td>
+          <td>0</td><td>1.67</td><td>3.34</td><td>5</td>
+        </tr>
+        <tr>
+          <td class="row-label">Tetrahymena media (mL)</td>
+          <td>5</td><td>3.34</td><td>1.67</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="row-label">Working stock — mL of 2 × 10⁴ cells/mL</td>
+          <td>5</td><td>5</td><td>5</td><td>5</td>
+        </tr>
+        <tr>
+          <td class="row-label">Final volume (mL)</td>
+          <td>10</td><td>10</td><td>10</td><td>10</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="results-section">
+  <div class="tag reveal">Results</div>
+  <h2 class="h2 reveal">Growth slopes across concentrations</h2>
+
+  <div class="slope-grid reveal">
+    <div class="slope-card sc-0">
+      <div class="slope-conc">0 mg/mL (Control)</div>
+      <div class="slope-val">1.53</div>
+      <div class="slope-unit">log-linear slope</div>
+      <div class="slope-bar-wrap"><div class="slope-bar" style="width:100%"></div></div>
+      <p style="font-size:0.78rem;color:#5a6a50;font-weight:300;margin-top:0.5rem">Highest growth rate — no extract</p>
+    </div>
+    <div class="slope-card sc-06">
+      <div class="slope-conc">0.6 mg/mL</div>
+      <div class="slope-val">1.42</div>
+      <div class="slope-unit">log-linear slope</div>
+      <div class="slope-bar-wrap"><div class="slope-bar" style="width:92.8%"></div></div>
+      <p style="font-size:0.78rem;color:#5a6a50;font-weight:300;margin-top:0.5rem">Modest reduction from control</p>
+    </div>
+    <div class="slope-card sc-12">
+      <div class="slope-conc">1.2 mg/mL</div>
+      <div class="slope-val">1.49</div>
+      <div class="slope-unit">log-linear slope</div>
+      <div class="slope-bar-wrap"><div class="slope-bar" style="width:97.4%"></div></div>
+      <p style="font-size:0.78rem;color:#5a6a50;font-weight:300;margin-top:0.5rem">Non-monotonic — slight recovery</p>
+    </div>
+    <div class="slope-card sc-18">
+      <div class="slope-conc">1.8 mg/mL</div>
+      <div class="slope-val">1.46</div>
+      <div class="slope-unit">log-linear slope</div>
+      <div class="slope-bar-wrap"><div class="slope-bar" style="width:95.4%"></div></div>
+      <p style="font-size:0.78rem;color:#5a6a50;font-weight:300;margin-top:0.5rem">Highest extract — reduced growth</p>
+    </div>
+  </div>
+
+  <div class="anova-banner reveal">
+    <div class="anova-num">p = 0.9209</div>
+    <div class="anova-text">
+      <h4>One-Way ANOVA Result</h4>
+      <p>No statistically significant difference was found between treatment groups (p = 0.9209, α = 0.05). The null hypothesis — that leaf extract concentration has no effect on growth rate — cannot be rejected based on the current dataset.</p>
+    </div>
+  </div>
+
+  <div class="trend-note reveal">
+    <strong>Observed trend:</strong> Despite the non-significant ANOVA, higher concentrations of leaf extract were directionally associated with a reduced growth rate slope (1.53 → 1.42 → 1.49 → 1.46). This non-monotonic pattern and high within-group variability (visible in boxplot error bars) suggest that a larger sample size or higher extract concentrations might reveal a statistically detectable effect.
+  </div>
+</section>
+
+<!-- DISCUSSION -->
+<section class="disc-section">
+  <div class="tag reveal">Discussion</div>
+  <h2 class="h2 reveal">Interpreting the pattern</h2>
+  <div class="disc-cols reveal">
+    <div class="disc-card">
+      <h3>What we found</h3>
+      <ul>
+        <li>Higher concentrations of leaf extract were associated with a reduced growth rate slope — a biologically plausible directional trend</li>
+        <li>The ANOVA p-value of 0.9209 indicates no statistically significant difference between groups at α = 0.05</li>
+        <li>Within-group variability across time-of-day sampling windows appears to be a major source of noise</li>
+        <li>The non-monotonic 1.2 mg/mL value suggests potential hormetic effects or pipetting variability</li>
+      </ul>
+    </div>
+    <div class="disc-card">
+      <h3>Why it matters</h3>
+      <ul>
+        <li>Plant secondary metabolites such as polyphenols and tannins are known to have cytostatic properties in model organisms</li>
+        <li>The concentration range tested (0–1.8 mg/mL) may fall below the threshold for detectable inhibition in <em>Tetrahymena</em></li>
+        <li>Local precipitation bias at Hope — an important parallel: local measurements may miss basin-scale processes, just as local extract effects may miss whole-cell responses</li>
+        <li>The result is informative: it bounds the no-effect range and guides future study design</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CONCLUSION -->
+<section class="concl-section">
+  <div class="tag reveal">Conclusion</div>
+  <h2 class="h2 reveal">Summary & future directions</h2>
+  <div class="concl-main">
+    <div style="display:flex;flex-direction:column;gap:1.5rem" class="reveal">
+      <div class="concl-finding">
+        <h4>It's related — directionally</h4>
+        <p>Higher concentrations of <em>Fagus sylvatica</em> leaf extract were associated with a lower growth rate slope in <em>Tetrahymena</em>, consistent with a mild inhibitory effect of beech phytochemicals on cell proliferation.</p>
+      </div>
+      <div class="concl-finding">
+        <h4>Not statistically significant</h4>
+        <p>The one-way ANOVA returned p = 0.9209, far above the α = 0.05 threshold. The differences observed are within the range of natural biological variability given this sample size and concentration range.</p>
+      </div>
+    </div>
+    <div class="future-box reveal">
+      <h4>Future Directions</h4>
+      <ul class="future-list">
+        <li>Explore higher extraction concentrations (e.g., 3.6–10 mg/mL) to find the inhibitory threshold</li>
+        <li>Optimize extraction methods using multiphase extraction to isolate specific phytochemical fractions</li>
+        <li>Increase sample replication to reduce within-group variance and improve statistical power</li>
+        <li>Standardize sampling time points to reduce time-of-day noise in cell counts</li>
+        <li>Test specific beech phytochemicals (tannic acid, quercetin) in isolation to identify active compounds</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ACKNOWLEDGEMENT -->
+<section class="ack-section">
+  <div class="tag reveal">Acknowledgement</div>
+  <div class="ack-box reveal">
+    <h3>Thank you</h3>
+    <p>Thank you to the UBC BIOL 342 teaching team for their guidance and support throughout this project.</p>
+    <div class="team">
+      <span class="name-pill">Prof. Celeste Leander</span>
+      <span class="name-pill">Miriam Fenniri</span>
+      <span class="name-pill">Josh Yang</span>
+      <span class="name-pill">Mindy Chow</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-logo">Fagus × Tetrahymena</span>
+  <p>Yunhao Guo · Jonassen Kenrick · Celine Wong</p>
+  <p>UBC BIOL 342</p>
+</footer>
+
+<script>
+// Falling leaves
+const lc = document.getElementById('leaves');
+const leafPaths = [
+  'M10,0 C18,2 22,10 18,18 C14,24 4,24 2,16 C-1,8 2,2 10,0Z',
+  'M8,0 C16,1 20,9 16,17 C12,23 3,22 1,15 C-2,7 2,1 8,0Z',
+  'M12,0 C18,3 20,12 15,18 C10,24 2,22 1,14 C-1,6 5,1 12,0Z',
+];
+for (let i = 0; i < 18; i++) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 24 28');
+  svg.setAttribute('width', 16 + Math.random()*18);
+  svg.setAttribute('height', 20 + Math.random()*22);
+  svg.style.position = 'absolute';
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d', leafPaths[i % leafPaths.length]);
+  path.setAttribute('fill', `rgba(${[90,158,94].join(',')},${0.15+Math.random()*0.25})`);
+  svg.appendChild(path);
+  const leaf = document.createElement('div');
+  leaf.className = 'leaf';
+  leaf.appendChild(svg);
+  leaf.style.left = Math.random()*100 + '%';
+  leaf.style.animationDuration = (10 + Math.random()*16) + 's';
+  leaf.style.animationDelay = (-Math.random()*16) + 's';
+  lc.appendChild(leaf);
+}
+
+// Scroll reveal
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('on'); obs.unobserve(e.target); } });
+}, { threshold:0.1, rootMargin:'0px 0px -50px 0px' });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
