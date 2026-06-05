@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menantea — Tea & Beyond Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--green:#2D6A4F;--green-mid:#40916C;--green-light:#74C69D;--green-pale:#D8F3DC;--yellow:#F4C430;--yellow-light:#FFF9E0;--cream:#FDFAF2;--dark:#1B1B1B;--gray:#6B7280;--white:#FFFFFF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden;}
+.header{background:var(--green);padding:0 48px;display:flex;align-items:center;justify-content:space-between;height:72px;position:sticky;top:0;z-index:200;}
+.logo-area{display:flex;align-items:center;gap:14px;}
+.logo-circle{width:44px;height:44px;background:var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:900;font-size:12px;color:var(--green);text-align:center;line-height:1.1;}
+.logo-text{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;}
+.logo-sub{font-size:11px;color:var(--green-light);letter-spacing:2px;text-transform:uppercase;}
+.header-right{display:flex;align-items:center;gap:20px;}
+.date-badge{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:6px 16px;font-size:12px;color:rgba(255,255,255,.8);}
+.live-dot{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green-light);}
+.dot{width:8px;height:8px;background:#52d68a;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);}}
+.ticker{background:var(--green-mid);overflow:hidden;height:36px;display:flex;align-items:center;}
+.ticker-inner{display:flex;white-space:nowrap;animation:ticker 30s linear infinite;}
+.ticker-item{display:inline-flex;align-items:center;gap:8px;padding:0 30px;font-size:12px;color:rgba(255,255,255,.85);border-right:1px solid rgba(255,255,255,.15);}
+.ticker-item .val{color:var(--yellow);font-weight:700;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.nav-tabs{background:var(--white);border-bottom:1px solid #E5E7EB;padding:0 48px;display:flex;gap:0;overflow-x:auto;}
+.nav-tab{padding:14px 22px;font-size:13px;font-weight:500;color:var(--gray);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .2s;}
+.nav-tab.active{color:var(--green);border-bottom-color:var(--green);}
+.nav-tab:hover:not(.active){color:var(--dark);}
+.hero{background:linear-gradient(135deg,var(--green) 0%,var(--green-mid) 55%,#52b788 100%);padding:44px 48px 52px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;right:-80px;top:-80px;width:360px;height:360px;background:var(--yellow);opacity:.1;border-radius:50%;}
+.hero::after{content:'';position:absolute;right:140px;bottom:-100px;width:240px;height:240px;background:var(--yellow);opacity:.07;border-radius:50%;}
+.hero-tag{display:inline-block;background:var(--yellow);color:var(--green);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:14px;}
+.hero h1{font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:#fff;line-height:1.15;max-width:580px;margin-bottom:10px;}
+.hero-sub{color:rgba(255,255,255,.7);font-size:14px;margin-bottom:28px;}
+.hero-stats{display:flex;gap:40px;flex-wrap:wrap;}
+.hero-stat-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#fff;}
+.hero-stat-lbl{font-size:11px;color:rgba(255,255,255,.6);letter-spacing:1px;text-transform:uppercase;}
+.platform-pills{position:absolute;right:48px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:2;}
+.platform-pill{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border-radius:12px;padding:10px 16px;border:1px solid rgba(255,255,255,.2);}
+.platform-pill-lbl{font-size:11px;color:rgba(255,255,255,.6);margin-bottom:2px;}
+.platform-pill-val{font-family:'Playfair Display',serif;font-size:18px;color:#fff;font-weight:700;}
+@keyframes floatAnim{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+.platform-pill:nth-child(1){animation:floatAnim 3.2s ease-in-out infinite;}
+.platform-pill:nth-child(2){animation:floatAnim 3.2s ease-in-out .6s infinite;}
+.platform-pill:nth-child(3){animation:floatAnim 3.2s ease-in-out 1.2s infinite;}
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);background:var(--white);border-bottom:1px solid #E5E7EB;}
+.kpi-cell{padding:22px 26px;border-right:1px solid #F3F4F6;position:relative;overflow:hidden;transition:background .2s;}
+.kpi-cell:last-child{border-right:none;}
+.kpi-cell:hover{background:var(--cream);}
+.kpi-cell::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--green-light);transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+.kpi-cell:hover::after{transform:scaleX(1);}
+.kpi-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-bottom:8px;}
+.kpi-value{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--green);line-height:1;margin-bottom:6px;}
+.kpi-change{font-size:12px;font-weight:500;}
+.kpi-change.up{color:#16A34A;}
+.kpi-change.down{color:#DC2626;}
+.kpi-icon-bg{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:30px;opacity:.11;}
+.sec{padding:32px 48px 0;}
+.sec-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+.sec-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--dark);}
+.sec-sub{font-size:13px;color:var(--gray);margin-top:3px;}
+.pill-group{display:flex;gap:6px;}
+.pill{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:all .2s;}
+.pill.active{background:var(--green);color:#fff;}
+.pill:not(.active){background:var(--green-pale);color:var(--green);}
+.pill:not(.active):hover{border-color:var(--green);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:20px;}
+.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:20px;}
+.card{background:var(--white);border-radius:18px;border:1px solid #E5E7EB;padding:24px 28px;transition:box-shadow .3s,transform .3s;opacity:0;animation:fadeUp .55s forwards;}
+.card:hover{box-shadow:0 8px 32px rgba(45,106,79,.09);transform:translateY(-2px);}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+.card.d1{animation-delay:.08s;}.card.d2{animation-delay:.16s;}.card.d3{animation-delay:.24s;}.card.d4{animation-delay:.32s;}.card.d5{animation-delay:.4s;}.card.d6{animation-delay:.48s;}
+.card-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--dark);}
+.card-sub{font-size:12px;color:var(--gray);margin-top:3px;}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-ig{background:#FEE2E2;color:#BE185D;}.badge-tt{background:#F3F4F6;color:#111;}.badge-x{background:#EFF6FF;color:#1D4ED8;}.badge-green{background:var(--green-pale);color:var(--green);}
+.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mini-cell{background:var(--cream);border-radius:12px;padding:12px 14px;border:1px solid #E8EDE6;}
+.mini-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--green);}
+.mini-lbl{font-size:10px;color:var(--gray);margin-top:2px;text-transform:uppercase;letter-spacing:.8px;}
+.mini-chg{font-size:11px;font-weight:500;margin-top:3px;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.bar-label{font-size:12px;color:var(--gray);width:90px;flex-shrink:0;text-align:right;}
+.bar-track{flex:1;height:20px;background:var(--green-pale);border-radius:10px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--green),var(--green-light));width:0;transition:width 1.3s cubic-bezier(.16,1,.3,1);display:flex;align-items:center;justify-content:flex-end;padding-right:7px;}
+.bar-fill span{font-size:10px;font-weight:700;color:#fff;white-space:nowrap;}
+.bar-fill.pink{background:linear-gradient(90deg,#BE185D,#F472B6);}
+.bar-fill.blue{background:linear-gradient(90deg,#1D4ED8,#60A5FA);}
+.bar-fill.yellow{background:linear-gradient(90deg,#D97706,var(--yellow));}
+.rank-num{width:24px;height:24px;border-radius:50%;background:var(--green-pale);color:var(--green);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rank-num.gold{background:var(--yellow);color:#7A5900;}.rank-num.silver{background:#E5E7EB;color:#374151;}.rank-num.bronze{background:#FEE2E2;color:#7C2D12;}
+.pct-bar{width:70px;height:5px;background:var(--green-pale);border-radius:3px;overflow:hidden;flex-shrink:0;}
+.pct-fill{height:100%;border-radius:3px;background:var(--green-mid);width:0;transition:width 1.4s cubic-bezier(.16,1,.3,1);}
+.pct-fill.yellow{background:var(--yellow);}.pct-fill.pink{background:#F472B6;}.pct-fill.blue{background:#60A5FA;}
+.donut-wrap{display:flex;align-items:center;gap:20px;}
+.donut-canvas-wrap{position:relative;width:150px;height:150px;flex-shrink:0;}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.donut-total{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--green);line-height:1.2;}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:8px;}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:12px;}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.legend-pct{font-weight:600;color:var(--green);margin-left:auto;}
+.sentiment-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:14px 0 10px;gap:2px;}
+.sent-labels{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.sent-label{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray);}
+.sent-dot{width:9px;height:9px;border-radius:2px;}
+.content-table{width:100%;border-collapse:collapse;font-size:12px;}
+.content-table th{text-align:left;padding:8px 10px;background:var(--cream);color:var(--gray);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.8px;}
+.content-table td{padding:9px 10px;border-bottom:1px solid #F3F4F6;vertical-align:middle;}
+.content-table tr:last-child td{border-bottom:none;}
+.content-table tr:hover td{background:#FAFDF8;}
+.chg-pill{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;}
+.chg-pill.up{background:#DCFCE7;color:#15803D;}.chg-pill.down{background:#FEE2E2;color:#DC2626;}.chg-pill.flat{background:#F3F4F6;color:#6B7280;}
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;}
+.heatmap-cell{aspect-ratio:1;border-radius:4px;transition:transform .15s;cursor:pointer;}
+.heatmap-cell:hover{transform:scale(1.2);}
+.heatmap-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;}
+.heatmap-day{text-align:center;font-size:10px;color:var(--gray);}
+.hm-legend{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:var(--gray);}
+.hm-swatch{width:12px;height:12px;border-radius:2px;}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
+.compare-col{border-radius:14px;padding:20px;border:1.5px solid #E5E7EB;}
+.compare-col.featured{border-color:var(--green);}
+.compare-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #F3F4F6;font-size:12px;}
+.compare-row:last-child{border-bottom:none;}
+.compare-row .val{font-weight:600;color:var(--dark);}
+.funnel-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.funnel-bar-wrap{flex:1;height:36px;background:var(--cream);border-radius:8px;overflow:hidden;}
+.funnel-fill{height:100%;border-radius:8px;display:flex;align-items:center;padding-left:14px;font-size:12px;font-weight:600;color:#fff;width:0;transition:width 1.3s cubic-bezier(.16,1,.3,1);}
+.funnel-lbl{width:110px;font-size:12px;color:var(--gray);flex-shrink:0;text-align:right;}
+.funnel-count{width:60px;font-size:13px;font-weight:700;color:var(--green);flex-shrink:0;text-align:right;}
+.wordcloud{display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;}
+.wc-word{padding:5px 12px;border-radius:20px;font-weight:500;cursor:default;transition:transform .2s;}
+.wc-word:hover{transform:scale(1.1);}
+.award-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.award-card{background:var(--cream);border-radius:14px;padding:16px;text-align:center;border:1px solid #E8EDE6;opacity:0;animation:fadeUp .5s forwards;}
+.award-icon{font-size:26px;margin-bottom:7px;}
+.award-name{font-size:11px;font-weight:600;color:var(--dark);}
+.award-val{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--green);margin:3px 0;}
+.award-lbl{font-size:10px;color:var(--gray);}
+.insight-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #F3F4F6;}
+.insight-row:last-child{border-bottom:none;}
+.insight-icon{width:34px;height:34px;border-radius:10px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.insight-text{font-size:12px;color:var(--dark);line-height:1.6;}
+.wave-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--gray);padding:0 2px;margin-top:4px;}
+.pad{padding:0 48px 24px;}
+.section-spacer{height:20px;}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <div class="ticker-item">📱 Instagram <span class="val">445K followers</span></div>
+    <div class="ticker-item">🎵 TikTok <span class="val">892K followers</span></div>
+    <div class="ticker-item">🐦 X (Twitter) <span class="val">128K followers</span></div>
+    <div class="ticker-item">💚 Monthly Orders <span class="val">18,400</span></div>
+    <div class="ticker-item">⭐ Avg Rating <span class="val">4.7 / 5.0</span></div>
+    <div class="ticker-item">🍵 Active SKUs <span class="val">87</span></div>
+    <div class="ticker-item">📦 Avg Basket <span class="val">IDR 94K</span></div>
+    <div class="ticker-item">💬 Total Comments <span class="val">2.1M</span></div>
+    <div class="ticker-item">🔁 Avg Shares / Post <span class="val">3,200</span></div>
+    <div class="ticker-item">📱 Instagram <span class="val">445K followers</span></div>
+    <div class="ticker-item">🎵 TikTok <span class="val">892K followers</span></div>
+    <div class="ticker-item">🐦 X (Twitter) <span class="val">128K followers</span></div>
+    <div class="ticker-item">💚 Monthly Orders <span class="val">18,400</span></div>
+    <div class="ticker-item">⭐ Avg Rating <span class="val">4.7 / 5.0</span></div>
+    <div class="ticker-item">🍵 Active SKUs <span class="val">87</span></div>
+    <div class="ticker-item">📦 Avg Basket <span class="val">IDR 94K</span></div>
+    <div class="ticker-item">💬 Total Comments <span class="val">2.1M</span></div>
+    <div class="ticker-item">🔁 Avg Shares / Post <span class="val">3,200</span></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-area">
+    <div class="logo-circle">tea &amp;<br>beyond</div>
+    <div>
+      <div class="logo-text">menantea</div>
+      <div class="logo-sub">Analytics Dashboard</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="date-badge">May 2026 · Season Report</div>
+    <div class="live-dot"><div class="dot"></div> Live</div>
+  </div>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <div class="nav-tab active">Overview</div>
+  <div class="nav-tab">Instagram</div>
+  <div class="nav-tab">TikTok</div>
+  <div class="nav-tab">X (Twitter)</div>
+  <div class="nav-tab">Products</div>
+  <div class="nav-tab">Audience</div>
+  <div class="nav-tab">Revenue</div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div style="position:relative;z-index:2;">
+    <div class="hero-tag">🍵 Tea & Beyond · 2026 Performance</div>
+    <h1>1.46M Followers Across<br>All Platforms</h1>
+    <div class="hero-sub">Unified analytics — Instagram, TikTok &amp; X · Product, engagement &amp; revenue</div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-val" id="hstat1">0</div><div class="hero-stat-lbl">Total Reach</div></div>
+      <div><div class="hero-stat-val" id="hstat2">0</div><div class="hero-stat-lbl">Engagement Rate</div></div>
+      <div><div class="hero-stat-val" id="hstat3">0</div><div class="hero-stat-lbl">Monthly Revenue</div></div>
+      <div><div class="hero-stat-val" id="hstat4">0</div><div class="hero-stat-lbl">Neteazen Score</div></div>
+    </div>
+  </div>
+  <div class="platform-pills">
+    <div class="platform-pill"><div class="platform-pill-lbl">Instagram</div><div class="platform-pill-val">445K</div></div>
+    <div class="platform-pill"><div class="platform-pill-lbl">TikTok</div><div class="platform-pill-val">892K</div></div>
+    <div class="platform-pill"><div class="platform-pill-lbl">X (Twitter)</div><div class="platform-pill-val">128K</div></div>
+  </div>
+</div>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi-cell"><div class="kpi-icon-bg">💰</div><div class="kpi-label">Monthly Revenue</div><div class="kpi-value" id="kpi1">0</div><div class="kpi-change up">↑ 14.2% MoM</div></div>
+  <div class="kpi-cell"><div class="kpi-icon-bg">📦</div><div class="kpi-label">Total Orders</div><div class="kpi-value" id="kpi2">0</div><div class="kpi-change up">↑ 8.7% MoM</div></div>
+  <div class="kpi-cell"><div class="kpi-icon-bg">💬</div><div class="kpi-label">Total Comments</div><div class="kpi-value" id="kpi3">0</div><div class="kpi-change up">↑ 22.1% MoM</div></div>
+  <div class="kpi-cell"><div class="kpi-icon-bg">🔁</div><div class="kpi-label">Avg Share Rate</div><div class="kpi-value" id="kpi4">0</div><div class="kpi-change up">↑ 6.4% MoM</div></div>
+  <div class="kpi-cell"><div class="kpi-icon-bg">⭐</div><div class="kpi-label">NPS Score</div><div class="kpi-value" id="kpi5">0</div><div class="kpi-change up">↑ +4 pts quarter</div></div>
+</div>
+
+<!-- ═══ REVENUE ═══ -->
+<div class="sec pad">
+  <div class="sec-head"><div><div class="sec-title">Revenue &amp; Orders</div><div class="sec-sub">Jan–May 2026 · all channels</div></div><div class="pill-group"><div class="pill active">2026</div><div class="pill">2025</div><div class="pill">YoY</div></div></div>
+  <div class="grid-2-1" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Monthly Revenue Breakdown</div><div class="card-sub">IDR millions · Beverages / Tea Bags / RTD / Merch</div></div></div>
+      <div style="position:relative;height:240px;"><canvas id="revenueChart" role="img" aria-label="Stacked bar monthly revenue">Revenue chart</canvas></div>
+      <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;">
+        <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray)"><span style="width:10px;height:10px;border-radius:2px;background:#2D6A4F;display:inline-block"></span>Beverages</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray)"><span style="width:10px;height:10px;border-radius:2px;background:#74C69D;display:inline-block"></span>Tea Bags</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray)"><span style="width:10px;height:10px;border-radius:2px;background:#60A5FA;display:inline-block"></span>RTD</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray)"><span style="width:10px;height:10px;border-radius:2px;background:#F4C430;display:inline-block"></span>Merch</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="card d2">
+        <div class="card-head"><div><div class="card-title">Revenue Split</div><div class="card-sub">Category share</div></div></div>
+        <div class="donut-wrap">
+          <div class="donut-canvas-wrap"><canvas id="revDonut" width="150" height="150" role="img" aria-label="Revenue donut">Rev donut</canvas><div class="donut-center"><div class="donut-total">IDR<br>1.6B</div></div></div>
+          <div class="donut-legend" id="revDonutLegend"></div>
+        </div>
+      </div>
+      <div class="card d3">
+        <div class="card-head"><div><div class="card-title">Weekly Orders</div><div class="card-sub">8-week trend</div></div></div>
+        <div style="position:relative;height:76px;"><canvas id="orderSpark" role="img" aria-label="Order sparkline">Orders</canvas></div>
+        <div class="wave-labels"><span>W1</span><span>W2</span><span>W3</span><span>W4</span><span>W5</span><span>W6</span><span>W7</span><span>W8</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PLATFORM COMPARISON ═══ -->
+<div class="pad">
+  <div class="sec-head"><div><div class="sec-title">Platform Comparison</div><div class="sec-sub">Instagram vs TikTok vs X · side-by-side</div></div></div>
+  <div class="compare-grid">
+    <div class="compare-col card d1">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);display:flex;align-items:center;justify-content:center;font-size:18px;">📸</div><div><div style="font-weight:700;font-size:15px;">Instagram</div><div style="font-size:12px;color:var(--gray);">@menantea.toko</div></div></div>
+      <div class="compare-row"><span style="color:var(--gray)">Followers</span><span class="val">445K</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Avg Likes</span><span class="val">12,400</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Avg Comments</span><span class="val">580</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Eng. Rate</span><span class="val">6.2%</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Story Views</span><span class="val">38K</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Posts / Month</span><span class="val">24</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Best Format</span><span class="val">Reels</span></div>
+    </div>
+    <div class="compare-col featured card d2">
+      <div style="background:var(--green-pale);color:var(--green);font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;display:inline-block;margin-bottom:10px;">🏆 Top Performer</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:34px;height:34px;border-radius:10px;background:#010101;display:flex;align-items:center;justify-content:center;font-size:18px;">🎵</div><div><div style="font-weight:700;font-size:15px;">TikTok</div><div style="font-size:12px;color:var(--gray);">@menantea.toko</div></div></div>
+      <div class="compare-row"><span style="color:var(--gray)">Followers</span><span class="val">892K</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Avg Likes</span><span class="val">48,200</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Avg Comments</span><span class="val">2,140</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Eng. Rate</span><span class="val">11.4%</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Avg Views</span><span class="val">420K</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Posts / Month</span><span class="val">38</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Best Format</span><span class="val">Video &lt;60s</span></div>
+    </div>
+    <div class="compare-col card d3">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:34px;height:34px;border-radius:10px;background:#000;display:flex;align-items:center;justify-content:center;font-size:18px;">🐦</div><div><div style="font-weight:700;font-size:15px;">X (Twitter)</div><div style="font-size:12px;color:var(--gray);">@menantea</div></div></div>
+      <div class="compare-row"><span style="color:var(--gray)">Followers</span><span class="val">128K</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Avg Likes</span><span class="val">3,800</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Avg Replies</span><span class="val">214</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Eng. Rate</span><span class="val">4.1%</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Impressions</span><span class="val">2.4M</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Posts / Month</span><span class="val">62</span></div>
+      <div class="compare-row"><span style="color:var(--gray)">Best Format</span><span class="val">Thread</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ INSTAGRAM ═══ -->
+<div class="pad" style="padding-top:32px;">
+  <div class="sec-head"><div><div class="sec-title">Instagram Deep Dive</div><div class="sec-sub">@menantea.toko · 445K followers · 1,101 posts</div></div><div class="badge badge-ig">📸 Instagram</div></div>
+  <div class="grid-2" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Follower Growth</div><div class="card-sub">Monthly net followers · 2025–2026</div></div></div>
+      <div style="position:relative;height:200px;"><canvas id="igGrowthChart" role="img" aria-label="Instagram follower growth">IG growth</canvas></div>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Format Performance</div><div class="card-sub">Avg engagement by content type</div></div></div>
+      <div style="position:relative;height:200px;"><canvas id="igFormatChart" role="img" aria-label="IG format performance">Format perf</canvas></div>
+    </div>
+  </div>
+  <div class="grid-3" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Engagement Metrics</div><div class="card-sub">Last 30 days</div></div></div>
+      <div class="mini-grid">
+        <div class="mini-cell"><div class="mini-val" id="ig1">0</div><div class="mini-lbl">Avg Likes</div><div class="mini-chg up" style="color:#16A34A">↑ 9.4%</div></div>
+        <div class="mini-cell"><div class="mini-val" id="ig2">0</div><div class="mini-lbl">Comments</div><div class="mini-chg up" style="color:#16A34A">↑ 14.1%</div></div>
+        <div class="mini-cell"><div class="mini-val" id="ig3">0</div><div class="mini-lbl">Story Views</div><div class="mini-chg up" style="color:#16A34A">↑ 6.8%</div></div>
+        <div class="mini-cell"><div class="mini-val" id="ig4">0</div><div class="mini-lbl">Saves / Post</div><div class="mini-chg up" style="color:#16A34A">↑ 18.2%</div></div>
+      </div>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Reach by Day</div><div class="card-sub">Avg reach by posting day</div></div></div>
+      <div id="igDayBars" style="padding-top:4px;"></div>
+    </div>
+    <div class="card d3">
+      <div class="card-head"><div><div class="card-title">Top Hashtags</div><div class="card-sub">By total reach · millions</div></div></div>
+      <div id="igHashtags"></div>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Top Posts This Month</div><div class="card-sub">Ranked by engagement</div></div></div>
+      <table class="content-table">
+        <thead><tr><th>Post</th><th>Format</th><th>Likes</th><th>Comments</th><th>Reach</th><th>Δ</th></tr></thead>
+        <tbody>
+          <tr><td>Matcha OOTD collab</td><td><span class="badge badge-ig" style="font-size:10px;">Reel</span></td><td>48,210</td><td>2,140</td><td>620K</td><td><span class="chg-pill up">↑ 32%</span></td></tr>
+          <tr><td>Sakura bag drop</td><td><span class="badge badge-ig" style="font-size:10px;">Carousel</span></td><td>31,800</td><td>1,420</td><td>390K</td><td><span class="chg-pill up">↑ 18%</span></td></tr>
+          <tr><td>Behind the brewing</td><td><span class="badge badge-ig" style="font-size:10px;">Reel</span></td><td>28,400</td><td>980</td><td>340K</td><td><span class="chg-pill up">↑ 11%</span></td></tr>
+          <tr><td>Neteazen spotlight</td><td><span class="badge badge-green" style="font-size:10px;">Story</span></td><td>—</td><td>620</td><td>142K</td><td><span class="chg-pill flat">→ 0%</span></td></tr>
+          <tr><td>Tea ritual morning</td><td><span class="badge badge-ig" style="font-size:10px;">Photo</span></td><td>18,200</td><td>540</td><td>188K</td><td><span class="chg-pill down">↓ 4%</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Best Post Times Heatmap</div><div class="card-sub">Avg reach by day &times; hour slot</div></div></div>
+      <div class="heatmap-days" id="heatmapDays"></div>
+      <div class="heatmap" id="heatmapGrid"></div>
+      <div class="hm-legend"><span>Low</span><div class="hm-swatch" style="background:#D8F3DC"></div><div class="hm-swatch" style="background:#95D5B2"></div><div class="hm-swatch" style="background:#52B788"></div><div class="hm-swatch" style="background:#2D6A4F"></div><span>High</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TIKTOK ═══ -->
+<div class="pad" style="padding-top:32px;">
+  <div class="sec-head"><div><div class="sec-title">TikTok Deep Dive</div><div class="sec-sub">@menantea.toko · 892K followers · Top-performing platform</div></div><div class="badge badge-tt">🎵 TikTok</div></div>
+  <div class="grid-2" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Views &amp; Followers Trend</div><div class="card-sub">Jan–May 2026</div></div></div>
+      <div style="position:relative;height:210px;"><canvas id="ttTrendChart" role="img" aria-label="TikTok trend">TikTok trend</canvas></div>
+      <div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--gray);">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:2px;background:#010101;display:inline-block;border-radius:2px"></span>Views (M)</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:2px;background:var(--yellow);display:inline-block;border-radius:2px"></span>Followers (K)</span>
+      </div>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Category Performance</div><div class="card-sub">Avg views by content type</div></div></div>
+      <div style="position:relative;height:210px;"><canvas id="ttCatChart" role="img" aria-label="TikTok category chart">TT cats</canvas></div>
+    </div>
+  </div>
+  <div class="grid-3" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">TikTok Metrics</div><div class="card-sub">30-day snapshot</div></div></div>
+      <div class="mini-grid">
+        <div class="mini-cell"><div class="mini-val" id="tt1">0</div><div class="mini-lbl">Avg Views</div><div class="mini-chg up" style="color:#16A34A">↑ 31%</div></div>
+        <div class="mini-cell"><div class="mini-val" id="tt2">0</div><div class="mini-lbl">Avg Likes</div><div class="mini-chg up" style="color:#16A34A">↑ 24%</div></div>
+        <div class="mini-cell"><div class="mini-val" id="tt3">0</div><div class="mini-lbl">Shares</div><div class="mini-chg up" style="color:#16A34A">↑ 18%</div></div>
+        <div class="mini-cell"><div class="mini-val" id="tt4">0</div><div class="mini-lbl">Completion</div><div class="mini-chg up" style="color:#16A34A">↑ 4.2%</div></div>
+      </div>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Video Length vs Views</div><div class="card-sub">Best duration range</div></div></div>
+      <div id="ttLengthBars" style="padding-top:4px;"></div>
+    </div>
+    <div class="card d3">
+      <div class="card-head"><div><div class="card-title">Audio Usage</div><div class="card-sub">Original vs trending sound</div></div></div>
+      <div style="position:relative;height:120px;margin-top:8px;"><canvas id="ttSoundChart" role="img" aria-label="TikTok audio donut">Sound</canvas></div>
+      <div style="display:flex;justify-content:center;gap:16px;margin-top:10px;font-size:12px;color:var(--gray);">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#2D6A4F;display:inline-block"></span>Original 52%</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--yellow);display:inline-block"></span>Trending 48%</span>
+      </div>
+    </div>
+  </div>
+  <div class="card d1" style="margin-bottom:20px;">
+    <div class="card-head"><div><div class="card-title">Top Videos This Month</div><div class="card-sub">Ranked by total views</div></div></div>
+    <table class="content-table">
+      <thead><tr><th>#</th><th>Video Title</th><th>Views</th><th>Likes</th><th>Comments</th><th>Shares</th><th>Duration</th><th>Audio</th></tr></thead>
+      <tbody>
+        <tr><td><span class="rank-num gold">1</span></td><td>Cowo kasian ketika...</td><td>2.1M</td><td>312K</td><td>18,200</td><td>44,100</td><td>45s</td><td>🎵 Trending</td></tr>
+        <tr><td><span class="rank-num silver">2</span></td><td>Di setiap pertemuan...</td><td>1.8M</td><td>248K</td><td>14,400</td><td>38,200</td><td>38s</td><td>🎵 Trending</td></tr>
+        <tr><td><span class="rank-num bronze">3</span></td><td>Matcha latte ASMR prep</td><td>940K</td><td>142K</td><td>8,800</td><td>21,400</td><td>52s</td><td>🎤 Original</td></tr>
+        <tr><td><span class="rank-num">4</span></td><td>Neteazen event recap</td><td>720K</td><td>98K</td><td>6,200</td><td>15,800</td><td>60s</td><td>🎤 Original</td></tr>
+        <tr><td><span class="rank-num">5</span></td><td>Tea vs coffee debate</td><td>580K</td><td>74K</td><td>5,400</td><td>12,100</td><td>30s</td><td>🎵 Trending</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ X (TWITTER) ═══ -->
+<div class="pad" style="padding-top:32px;">
+  <div class="sec-head"><div><div class="sec-title">X (Twitter) Deep Dive</div><div class="sec-sub">@menantea · 128K followers · Community-driven</div></div><div class="badge badge-x">🐦 X (Twitter)</div></div>
+  <div class="grid-2" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Impressions &amp; Engagements</div><div class="card-sub">Jan–May 2026</div></div></div>
+      <div style="position:relative;height:210px;"><canvas id="xTrendChart" role="img" aria-label="X impressions chart">X trend</canvas></div>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Tweet Type Performance</div><div class="card-sub">Avg impressions by format</div></div></div>
+      <div id="xTypeBars" style="padding-top:8px;"></div>
+    </div>
+  </div>
+  <div class="grid-4" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">X Metrics</div></div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="mini-cell"><div class="mini-val" id="x1">0</div><div class="mini-lbl">Impressions</div><div class="mini-chg up" style="color:#16A34A">↑ 12%</div></div>
+        <div class="mini-cell"><div class="mini-val" id="x2">0</div><div class="mini-lbl">Profile Clicks</div><div class="mini-chg up" style="color:#16A34A">↑ 8%</div></div>
+      </div>
+    </div>
+    <div class="card d2">
+      <div style="display:flex;flex-direction:column;gap:10px;height:100%;justify-content:center;">
+        <div class="mini-cell"><div class="mini-val" id="x3">0</div><div class="mini-lbl">Retweets</div><div class="mini-chg up" style="color:#16A34A">↑ 21%</div></div>
+        <div class="mini-cell"><div class="mini-val" id="x4">0</div><div class="mini-lbl">Link Clicks</div><div class="mini-chg down" style="color:#DC2626">↓ 3%</div></div>
+      </div>
+    </div>
+    <div class="card d3">
+      <div class="card-head"><div><div class="card-title">Audience Split</div><div class="card-sub">X demographics</div></div></div>
+      <div style="position:relative;height:120px;"><canvas id="xDemoChart" role="img" aria-label="X demographics">X demo</canvas></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:11px;color:var(--gray);" id="xDemoLegend"></div>
+    </div>
+    <div class="card d4">
+      <div class="card-head"><div><div class="card-title">Best Times</div><div class="card-sub">X posting hours</div></div></div>
+      <div id="xTimeBars"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AUDIENCE ═══ -->
+<div class="pad" style="padding-top:32px;">
+  <div class="sec-head"><div><div class="sec-title">Audience Intelligence</div><div class="sec-sub">Combined demographics · all platforms</div></div></div>
+  <div class="grid-3" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Age Distribution</div><div class="card-sub">All platforms combined</div></div></div>
+      <div style="position:relative;height:190px;"><canvas id="ageChart" role="img" aria-label="Age distribution">Age chart</canvas></div>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Gender Split</div><div class="card-sub">Cross-platform</div></div></div>
+      <div style="position:relative;height:160px;"><canvas id="genderChart" role="img" aria-label="Gender donut">Gender chart</canvas></div>
+      <div style="display:flex;justify-content:center;gap:14px;margin-top:8px;font-size:12px;color:var(--gray);">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:#F472B6;display:inline-block"></span>Female 68%</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:#60A5FA;display:inline-block"></span>Male 29%</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:#D1D5DB;display:inline-block"></span>Other 3%</span>
+      </div>
+    </div>
+    <div class="card d3">
+      <div class="card-head"><div><div class="card-title">Top Cities</div><div class="card-sub">By combined follower count</div></div></div>
+      <div id="cityBars"></div>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Audience Interests</div><div class="card-sub">What Neteazens also follow</div></div></div>
+      <div style="position:relative;height:210px;"><canvas id="interestChart" role="img" aria-label="Interest radar chart">Interest radar</canvas></div>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Community Keywords</div><div class="card-sub">Most-used words in comments &amp; replies</div></div></div>
+      <div class="wordcloud" id="wordCloud"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PRODUCTS ═══ -->
+<div class="pad" style="padding-top:32px;">
+  <div class="sec-head"><div><div class="sec-title">Product Performance</div><div class="sec-sub">Top SKUs by revenue, orders &amp; mentions</div></div></div>
+  <div class="grid-2-1" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Top 10 Products by Revenue</div><div class="card-sub">May 2026 · IDR millions</div></div></div>
+      <div id="productBars"></div>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Category Mix</div><div class="card-sub">By product line</div></div></div>
+      <div style="position:relative;height:190px;"><canvas id="catDonut" role="img" aria-label="Category donut">Cat donut</canvas></div>
+      <div id="catDonutLegend" style="margin-top:10px;display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+  </div>
+  <div class="grid-3" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Social Mentions per Product</div><div class="card-sub">Instagram + TikTok + X</div></div></div>
+      <div id="mentionBars"></div>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Review Ratings</div><div class="card-sub">12,840 total reviews</div></div></div>
+      <div id="ratingBars"></div>
+      <div style="margin-top:14px;display:flex;align-items:center;gap:12px;">
+        <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--green);">4.7</div>
+        <div><div style="font-size:18px;letter-spacing:2px;color:var(--yellow);">★★★★★</div><div style="font-size:11px;color:var(--gray);">12,840 total reviews</div></div>
+      </div>
+    </div>
+    <div class="card d3">
+      <div class="card-head"><div><div class="card-title">Customer Sentiment</div><div class="card-sub">All review channels</div></div></div>
+      <div class="sentiment-bar"><div style="flex:78;background:var(--green-light);"></div><div style="flex:15;background:var(--yellow);"></div><div style="flex:7;background:#FCA5A5;"></div></div>
+      <div class="sent-labels"><div class="sent-label"><div class="sent-dot" style="background:var(--green-light)"></div>Positive 78%</div><div class="sent-label"><div class="sent-dot" style="background:var(--yellow)"></div>Neutral 15%</div><div class="sent-label"><div class="sent-dot" style="background:#FCA5A5"></div>Negative 7%</div></div>
+      <div style="margin-top:16px;"><div style="font-size:12px;font-weight:600;color:var(--dark);margin-bottom:8px;">Positive Keywords</div><div style="display:flex;flex-wrap:wrap;gap:6px;" id="posKw"></div></div>
+      <div style="margin-top:12px;"><div style="font-size:12px;font-weight:600;color:var(--dark);margin-bottom:8px;">Negative Keywords</div><div style="display:flex;flex-wrap:wrap;gap:6px;" id="negKw"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FUNNEL ═══ -->
+<div class="pad" style="padding-top:32px;">
+  <div class="sec-head"><div><div class="sec-title">Social-to-Purchase Funnel</div><div class="sec-sub">How followers become customers</div></div></div>
+  <div class="grid-2" style="margin-bottom:20px;">
+    <div class="card d1">
+      <div class="card-head"><div><div class="card-title">Conversion Funnel</div><div class="card-sub">Reach → Awareness → Intent → Purchase</div></div></div>
+      <div id="funnelBars" style="padding-top:8px;"></div>
+    </div>
+    <div class="card d2">
+      <div class="card-head"><div><div class="card-title">Traffic Source to Shop</div><div class="card-sub">Where orders originate</div></div></div>
+      <div style="position:relative;height:200px;"><canvas id="trafficChart" role="img" aria-label="Traffic source donut">Traffic</canvas></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:11px;color:var(--gray);" id="trafficLegend"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AWARDS + INSIGHTS ═══ -->
+<div class="pad" style="padding-top:32px;padding-bottom:48px;">
+  <div class="sec-head"><div><div class="sec-title">Neteazen Highlights</div><div class="sec-sub">Milestones &amp; record moments</div></div></div>
+  <div class="award-grid" style="margin-bottom:28px;">
+    <div class="award-card d1"><div class="award-icon">🏆</div><div class="award-name">Best Performing Post</div><div class="award-val">2.1M</div><div class="award-lbl">TikTok views</div></div>
+    <div class="award-card d2"><div class="award-icon">🚀</div><div class="award-name">Fastest Growth Week</div><div class="award-val">+28K</div><div class="award-lbl">followers in 7 days</div></div>
+    <div class="award-card d3"><div class="award-icon">💬</div><div class="award-name">Most Comments</div><div class="award-val">18.2K</div><div class="award-lbl">single TikTok video</div></div>
+    <div class="award-card d4"><div class="award-icon">🌟</div><div class="award-name">Top Review Month</div><div class="award-val">4.9★</div><div class="award-lbl">March 2026</div></div>
+  </div>
+  <div class="sec-head"><div><div class="sec-title">Key Insights</div><div class="sec-sub">Data-driven recommendations</div></div></div>
+  <div class="card d1" id="insightCard"></div>
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.color='#6B7280';
+
+function animateCounter(el,target,suffix,dec,pre){
+  if(!el)return;
+  const dur=1800,s=performance.now();
+  (function step(now){
+    const p=Math.min((now-s)/dur,1),e=1-Math.pow(1-p,3),v=e*target;
+    let d;
+    if(dec)d=v.toFixed(1);
+    else if(target>=1e9)d=(v/1e9).toFixed(1)+'B';
+    else if(target>=1e6)d=(v/1e6).toFixed(1)+'M';
+    else if(target>=1e3)d=(v/1e3).toFixed(1)+'K';
+    else d=Math.round(v).toString();
+    el.textContent=(pre||'')+d+(suffix||'');
+    if(p<1)requestAnimationFrame(step);
+  })(s);
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    animateCounter(document.getElementById('hstat1'),4800000,' reach');
+    animateCounter(document.getElementById('hstat2'),8.6,'%',true);
+    animateCounter(document.getElementById('hstat3'),1600000000,'',false,'IDR ');
+    animateCounter(document.getElementById('hstat4'),94,'/100');
+    animateCounter(document.getElementById('kpi1'),1600000000,'',false,'IDR ');
+    animateCounter(document.getElementById('kpi2'),18400,'');
+    animateCounter(document.getElementById('kpi3'),2100000,'');
+    animateCounter(document.getElementById('kpi4'),3.2,'%',true);
+    animateCounter(document.getElementById('kpi5'),72,'');
+    animateCounter(document.getElementById('ig1'),12400,'');
+    animateCounter(document.getElementById('ig2'),580,'');
+    animateCounter(document.getElementById('ig3'),38200,'');
+    animateCounter(document.getElementById('ig4'),2100,'');
+    animateCounter(document.getElementById('tt1'),420000,'');
+    animateCounter(document.getElementById('tt2'),48200,'');
+    animateCounter(document.getElementById('tt3'),12800,'');
+    animateCounter(document.getElementById('tt4'),68.4,'%',true);
+    animateCounter(document.getElementById('x1'),2400000,'');
+    animateCounter(document.getElementById('x2'),18400,'');
+    animateCounter(document.getElementById('x3'),4200,'');
+    animateCounter(document.getElementById('x4'),8800,'');
+  },300);
+});
+
+// Revenue stacked
+new Chart(document.getElementById('revenueChart'),{type:'bar',data:{labels:['Jan','Feb','Mar','Apr','May'],datasets:[{label:'Beverages',data:[312,380,428,510,592],backgroundColor:'#2D6A4F',borderRadius:5,borderSkipped:false},{label:'Tea Bags',data:[145,178,210,265,310],backgroundColor:'#74C69D',borderRadius:5,borderSkipped:false},{label:'RTD',data:[34,48,58,72,84],backgroundColor:'#60A5FA',borderRadius:5,borderSkipped:false},{label:'Merch',data:[48,62,75,88,102],backgroundColor:'#F4C430',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false},border:{display:false}},y:{stacked:true,grid:{color:'#F3F4F6'},border:{display:false},ticks:{callback:v=>'IDR '+v+'M'}}},animation:{duration:1400,easing:'easeOutQuart'}}});
+
+// Rev donut
+const revCats=[{label:'Beverages',pct:53,color:'#2D6A4F'},{label:'Tea Bags',pct:28,color:'#74C69D'},{label:'RTD',pct:11,color:'#60A5FA'},{label:'Merch',pct:8,color:'#F4C430'}];
+new Chart(document.getElementById('revDonut'),{type:'doughnut',data:{labels:revCats.map(d=>d.label),datasets:[{data:revCats.map(d=>d.pct),backgroundColor:revCats.map(d=>d.color),borderWidth:3,borderColor:'#fff',hoverOffset:6}]},options:{responsive:false,cutout:'66%',plugins:{legend:{display:false}},animation:{duration:1400}}});
+const rl=document.getElementById('revDonutLegend');
+revCats.forEach(d=>{rl.innerHTML+=`<div class="legend-item"><div class="legend-dot" style="background:${d.color}"></div><div>${d.label}</div><div class="legend-pct">${d.pct}%</div></div>`;});
+
+// Order spark
+new Chart(document.getElementById('orderSpark'),{type:'line',data:{labels:['W1','W2','W3','W4','W5','W6','W7','W8'],datasets:[{data:[3800,4200,3900,5100,4800,6200,5800,7100],borderColor:'#2D6A4F',backgroundColor:'rgba(116,198,157,.15)',borderWidth:2.5,fill:true,tension:0.4,pointBackgroundColor:'#2D6A4F',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}},animation:{duration:1400}}});
+
+// IG growth
+new Chart(document.getElementById('igGrowthChart'),{type:'line',data:{labels:['May25','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan26','Feb','Mar','Apr','May'],datasets:[{label:'Followers(K)',data:[284,298,315,324,338,356,372,390,404,418,430,438,445],borderColor:'#E1306C',backgroundColor:'rgba(225,48,108,.08)',borderWidth:2.5,fill:true,tension:0.4,pointBackgroundColor:'#E1306C',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},border:{display:false},ticks:{maxRotation:30,font:{size:9}}},y:{grid:{color:'#F3F4F6'},border:{display:false},ticks:{callback:v=>v+'K'}}},animation:{duration:1400}}});
+
+// IG format
+new Chart(document.getElementById('igFormatChart'),{type:'bar',data:{labels:['Reels','Carousel','Photo','Story','Live'],datasets:[{label:'Likes',data:[28400,18200,12400,4200,8800],backgroundColor:'#E1306C',borderRadius:6},{label:'Comments',data:[1240,820,480,280,620],backgroundColor:'#F4C430',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},border:{display:false}},y:{grid:{color:'#F3F4F6'},border:{display:false}}},animation:{duration:1400}}});
+
+// IG day bars
+const igDayEl=document.getElementById('igDayBars');
+[{d:'Sunday',v:92},{d:'Saturday',v:84},{d:'Friday',v:72},{d:'Thursday',v:61},{d:'Wednesday',v:55},{d:'Monday',v:48},{d:'Tuesday',v:40}].forEach(r=>{igDayEl.innerHTML+=`<div class="bar-row" style="margin-bottom:7px;"><div class="bar-label" style="width:72px;font-size:11px;">${r.d}</div><div class="bar-track" style="height:16px;"><div class="bar-fill pink" data-w="${r.v}"><span>${r.v}K</span></div></div></div>`;});
+
+// IG hashtags
+const igHEl=document.getElementById('igHashtags');
+[{t:'#menantea',v:92},{t:'#teaandbeyond',v:74},{t:'#neteazen',v:68},{t:'#matchalover',v:55},{t:'#teavibes',v:39},{t:'#matchalatte',v:34}].forEach(h=>{igHEl.innerHTML+=`<div class="bar-row" style="margin-bottom:7px;"><div class="bar-label" style="width:100px;font-size:11px;">${h.t}</div><div class="bar-track" style="height:16px;"><div class="bar-fill pink" data-w="${h.v}"><span>${h.v}K</span></div></div></div>`;});
+
+// Heatmap
+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{document.getElementById('heatmapDays').innerHTML+=`<div class="heatmap-day">${d}</div>`;});
+const heatColors=['#D8F3DC','#95D5B2','#52B788','#2D6A4F'];
+[[1,2,1,2,3,4,5],[2,3,2,3,4,5,4],[3,4,3,4,5,4,3],[4,5,4,5,4,3,2],[3,4,3,4,3,2,1],[2,3,2,3,2,1,1]].forEach(row=>{row.forEach(val=>{document.getElementById('heatmapGrid').innerHTML+=`<div class="heatmap-cell" style="background:${heatColors[Math.min(val-1,3)]}"></div>`;});});
+
+// TT trend
+new Chart(document.getElementById('ttTrendChart'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May'],datasets:[{label:'Views(M)',data:[3.2,4.8,6.1,7.4,9.2],borderColor:'#010101',backgroundColor:'rgba(0,0,0,.05)',borderWidth:2.5,fill:true,tension:0.4,pointRadius:4,yAxisID:'y'},{label:'Followers(K)',data:[620,700,768,830,892],borderColor:'#F4C430',borderWidth:2.5,fill:false,tension:0.4,pointRadius:4,borderDash:[5,4],yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},border:{display:false}},y:{grid:{color:'#F3F4F6'},border:{display:false},ticks:{callback:v=>v+'M'}},y1:{position:'right',grid:{display:false},border:{display:false},ticks:{callback:v=>v+'K'}}},animation:{duration:1400}}});
+
+// TT category
+new Chart(document.getElementById('ttCatChart'),{type:'bar',data:{labels:['Comedy','Product','ASMR','Tutorial','UGC','BTS','Challenge'],datasets:[{label:'Avg Views',data:[1800,920,740,580,1200,480,1040],backgroundColor:['#010101','#2D6A4F','#40916C','#74C69D','#F4C430','#60A5FA','#F472B6'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},border:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#F3F4F6'},border:{display:false},ticks:{callback:v=>v+'K'}}},animation:{duration:1400}}});
+
+// TT length bars
+const ttLEl=document.getElementById('ttLengthBars');
+[{l:'< 15s',v:38},{l:'15–30s',v:62},{l:'30–60s',v:84},{l:'60–90s',v:54},{l:'> 90s',v:28}].forEach(r=>{ttLEl.innerHTML+=`<div class="bar-row"><div class="bar-label" style="width:55px;">${r.l}</div><div class="bar-track" style="height:18px;"><div class="bar-fill" data-w="${r.v}"><span>${r.v*10}K</span></div></div></div>`;});
+
+// TT sound
+new Chart(document.getElementById('ttSoundChart'),{type:'doughnut',data:{labels:['Original','Trending'],datasets:[{data:[52,48],backgroundColor:['#2D6A4F','#F4C430'],borderWidth:3,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}},animation:{duration:1400}}});
+
+// X trend
+new Chart(document.getElementById('xTrendChart'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May'],datasets:[{label:'Impressions(M)',data:[1.4,1.8,2.0,2.2,2.4],borderColor:'#000',backgroundColor:'rgba(0,0,0,.05)',borderWidth:2.5,fill:true,tension:0.4,pointRadius:4,yAxisID:'y'},{label:'Engagements(K)',data:[18,24,28,32,38],borderColor:'#F4C430',borderWidth:2.5,fill:false,tension:0.4,pointRadius:4,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},border:{display:false}},y:{grid:{color:'#F3F4F6'},border:{display:false},ticks:{callback:v=>v+'M'}},y1:{position:'right',grid:{display:false},border:{display:false},ticks:{callback:v=>v+'K'}}},animation:{duration:1400}}});
+
+// X type bars
+const xTypeEl=document.getElementById('xTypeBars');
+[{t:'Thread',v:88},{t:'Photo',v:72},{t:'Video',v:64},{t:'Poll',v:54},{t:'Text only',v:40},{t:'Quote RT',v:36}].forEach(r=>{xTypeEl.innerHTML+=`<div class="bar-row"><div class="bar-label" style="width:70px;">${r.t}</div><div class="bar-track" style="height:18px;"><div class="bar-fill blue" data-w="${r.v}"><span>${r.v*28}K</span></div></div></div>`;});
+
+// X demo donut
+const xDemoData=[{label:'F 18-24',pct:32,color:'#F472B6'},{label:'F 25-34',pct:24,color:'#E1306C'},{label:'M 18-24',pct:18,color:'#60A5FA'},{label:'M 25-34',pct:16,color:'#1D4ED8'},{label:'Other',pct:10,color:'#D1D5DB'}];
+new Chart(document.getElementById('xDemoChart'),{type:'doughnut',data:{labels:xDemoData.map(d=>d.label),datasets:[{data:xDemoData.map(d=>d.pct),backgroundColor:xDemoData.map(d=>d.color),borderWidth:3,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}},animation:{duration:1400}}});
+const xDL=document.getElementById('xDemoLegend');
+xDemoData.forEach(d=>{xDL.innerHTML+=`<span style="display:flex;align-items:center;gap:3px;font-size:10px;"><span style="width:8px;height:8px;border-radius:2px;background:${d.color};display:inline-block;"></span>${d.label} ${d.pct}%</span>`;});
+
+// X time bars
+const xTEl=document.getElementById('xTimeBars');
+[{t:'7–9 AM',v:74},{t:'12–2 PM',v:68},{t:'7–9 PM',v:92},{t:'9–11 PM',v:84},{t:'2–4 AM',v:28}].forEach(r=>{xTEl.innerHTML+=`<div class="bar-row"><div class="bar-label" style="width:65px;">${r.t}</div><div class="bar-track" style="height:16px;"><div class="bar-fill blue" data-w="${r.v}"><span>${r.v*25}K</span></div></div></div>`;});
+
+// Age chart
+new Chart(document.getElementById('ageChart'),{type:'bar',data:{labels:['13–17','18–24','25–34','35–44','45–54','55+'],datasets:[{label:'% of audience',data:[8,42,31,12,5,2],backgroundColor:['#95D5B2','#2D6A4F','#40916C','#74C69D','#B7E4C7','#D8F3DC'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},border:{display:false}},y:{grid:{color:'#F3F4F6'},border:{display:false},ticks:{callback:v=>v+'%'}}},animation:{duration:1400}}});
+
+// Gender donut
+new Chart(document.getElementById('genderChart'),{type:'doughnut',data:{labels:['Female','Male','Other'],datasets:[{data:[68,29,3],backgroundColor:['#F472B6','#60A5FA','#D1D5DB'],borderWidth:3,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}},animation:{duration:1400}}});
+
+// City bars
+const cityEl=document.getElementById('cityBars');
+[{c:'🏙️ Jakarta',v:100},{c:'🌺 Surabaya',v:55},{c:'🏔️ Bandung',v:45},{c:'🌴 Bali',v:34},{c:'🌿 Yogyakarta',v:26},{c:'🌊 Medan',v:17}].forEach(r=>{cityEl.innerHTML+=`<div class="bar-row"><div class="bar-label" style="width:100px;font-size:11px;">${r.c}</div><div class="bar-track" style="height:16px;"><div class="bar-fill" data-w="${r.v}"><span>${r.v}K</span></div></div></div>`;});
+
+// Interest radar
+new Chart(document.getElementById('interestChart'),{type:'radar',data:{labels:['Food & Drink','Lifestyle','Beauty','Fashion','Wellness','Travel','Entertainment'],datasets:[{label:'Interest',data:[94,82,76,71,68,58,52],backgroundColor:'rgba(45,106,79,.15)',borderColor:'#2D6A4F',borderWidth:2.5,pointBackgroundColor:'#2D6A4F',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,grid:{color:'#E5E7EB'},ticks:{display:false},pointLabels:{font:{size:11}}}},animation:{duration:1400}}});
+
+// Word cloud
+const wcColors=['#2D6A4F','#40916C','#74C69D','#E1306C','#F4C430','#010101','#1D4ED8','#8B5CF6'];
+[{w:'enak banget',s:28},{w:'matcha!',s:22},{w:'neteazen',s:24},{w:'worth it',s:20},{w:'suka banget',s:18},{w:'restock dong',s:16},{w:'aesthetic',s:22},{w:'tea lover',s:18},{w:'packaging bagus',s:14},{w:'recommend!',s:20},{w:'love this',s:16},{w:'kapan restock',s:14},{w:'my fav',s:18},{w:'beli lagi',s:20}].forEach((w,i)=>{
+  const sp=document.createElement('span');sp.className='wc-word';sp.textContent=w.w;
+  sp.style.fontSize=(w.s*.55+10)+'px';sp.style.background=wcColors[i%wcColors.length]+'18';sp.style.color=wcColors[i%wcColors.length];sp.style.border='1px solid '+wcColors[i%wcColors.length]+'30';
+  document.getElementById('wordCloud').appendChild(sp);
+});
+
+// Product bars
+const pEl=document.getElementById('productBars');
+[{n:'🍵 Matcha Latte',v:100},{n:'🌸 Sakura Tea Bag',v:83},{n:'🥛 Milk Tea Classic',v:68},{n:'🍋 Lemon Verbena',v:52},{n:'🎁 Gift Set Luxury',v:41},{n:'🫙 Cold Brew Oolong',v:30},{n:'🍓 Strawberry Blend',v:28},{n:'🌿 Peppermint Pure',v:24},{n:'☕ Chai Masala',v:20},{n:'🍑 Peach White Tea',v:18}].forEach(r=>{pEl.innerHTML+=`<div class="bar-row"><div class="bar-label" style="width:140px;font-size:11px;white-space:nowrap;">${r.n}</div><div class="bar-track" style="height:18px;"><div class="bar-fill" data-w="${r.v}"><span>IDR ${Math.round(r.v*1.42)}M</span></div></div></div>`;});
+
+// Cat donut
+const catData=[{label:'Beverages',pct:42,color:'#2D6A4F'},{label:'Tea Bags',pct:28,color:'#40916C'},{label:'RTD',pct:18,color:'#74C69D'},{label:'Merch',pct:8,color:'#F4C430'},{label:'Gift Sets',pct:4,color:'#D8F3DC'}];
+new Chart(document.getElementById('catDonut'),{type:'doughnut',data:{labels:catData.map(d=>d.label),datasets:[{data:catData.map(d=>d.pct),backgroundColor:catData.map(d=>d.color),borderWidth:3,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}},animation:{duration:1400}}});
+const clEl=document.getElementById('catDonutLegend');
+catData.forEach(d=>{clEl.innerHTML+=`<div class="legend-item"><div class="legend-dot" style="background:${d.color}"></div><div style="font-size:12px;">${d.label}</div><div class="legend-pct">${d.pct}%</div></div>`;});
+
+// Mention bars
+const mEl=document.getElementById('mentionBars');
+[{n:'🍵 Matcha Latte',v:92},{n:'🌸 Sakura Bag',v:74},{n:'🥛 Milk Tea',v:62},{n:'🍋 Lemon Verbena',v:48},{n:'🎁 Gift Set',v:38}].forEach(r=>{mEl.innerHTML+=`<div class="bar-row"><div class="bar-label" style="width:105px;font-size:11px;">${r.n}</div><div class="bar-track" style="height:16px;"><div class="bar-fill pink" data-w="${r.v}"><span>${r.v}K</span></div></div></div>`;});
+
+// Ratings
+const rEl=document.getElementById('ratingBars');
+[{s:'★★★★★ 5',v:72},{s:'★★★★☆ 4',v:20},{s:'★★★☆☆ 3',v:5},{s:'★★☆☆☆ 2',v:2},{s:'★☆☆☆☆ 1',v:1}].forEach(r=>{rEl.innerHTML+=`<div class="bar-row"><div class="bar-label" style="width:90px;font-size:11px;">${r.s}</div><div class="bar-track" style="height:14px;"><div class="bar-fill yellow" data-w="${r.v}"><span>${r.v}%</span></div></div></div>`;});
+
+// Keywords
+['enak','lembut','wangi','packaging bagus','worth it','recommend','harga oke'].forEach(k=>{document.getElementById('posKw').innerHTML+=`<span style="background:#DCFCE7;color:#15803D;font-size:11px;padding:4px 10px;border-radius:12px;font-weight:500;">${k}</span>`;});
+['lama kirim','sold out','mahal','susah buka'].forEach(k=>{document.getElementById('negKw').innerHTML+=`<span style="background:#FEE2E2;color:#DC2626;font-size:11px;padding:4px 10px;border-radius:12px;font-weight:500;">${k}</span>`;});
+
+// Funnel
+const fEl=document.getElementById('funnelBars');
+[{l:'Total Reach',n:'4.8M',p:100,c:'#2D6A4F'},{l:'Profile Visits',n:'840K',p:75,c:'#40916C'},{l:'Link Clicks',n:'280K',p:55,c:'#74C69D'},{l:'Shop Visits',n:'92K',p:38,c:'#F4C430'},{l:'Add to Cart',n:'28K',p:22,c:'#F97316'},{l:'Purchases',n:'18.4K',p:12,c:'#E1306C'}].forEach(f=>{fEl.innerHTML+=`<div class="funnel-row"><div class="funnel-lbl">${f.l}</div><div class="funnel-bar-wrap"><div class="funnel-fill" data-w="${f.p}" style="background:${f.c};">${f.n}</div></div><div style="width:56px;font-size:13px;font-weight:700;color:var(--green);flex-shrink:0;text-align:right;">${f.n}</div></div>`;});
+
+// Traffic source donut
+const ts=[{label:'TikTok',pct:38,color:'#010101'},{label:'Instagram',pct:29,color:'#E1306C'},{label:'X (Twitter)',pct:11,color:'#1D4ED8'},{label:'Direct',pct:14,color:'#2D6A4F'},{label:'Other',pct:8,color:'#D1D5DB'}];
+new Chart(document.getElementById('trafficChart'),{type:'doughnut',data:{labels:ts.map(d=>d.label),datasets:[{data:ts.map(d=>d.pct),backgroundColor:ts.map(d=>d.color),borderWidth:3,borderColor:'#fff',hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}},animation:{duration:1400}}});
+const tl=document.getElementById('trafficLegend');
+ts.forEach(d=>{tl.innerHTML+=`<span style="display:flex;align-items:center;gap:4px;"><span style="width:9px;height:9px;border-radius:2px;background:${d.color};display:inline-block;"></span>${d.label} ${d.pct}%</span>`;});
+
+// Insights
+const ic=document.getElementById('insightCard');
+[{i:'🎵',t:'<strong>TikTok is your #1 growth engine.</strong> With 892K followers and 11.4% engagement rate, TikTok drives 38% of all shop traffic. Post 5–6 videos per week under 60 seconds for maximum reach.'},{i:'🕗',t:'<strong>Best time to post on Instagram: Sunday 7–9 PM.</strong> Posts in this window receive 42% higher reach than weekday mornings. Story engagement peaks at 10 PM.'},{i:'🍵',t:'<strong>Matcha Latte is your hero product.</strong> IDR 142M monthly revenue and 92K social mentions. A limited edition variant could generate outsized buzz.'},{i:'👩',t:'<strong>68% of your audience is female aged 18–34.</strong> Relatable lifestyle moments resonate strongest. The "Cowo kasian ketika..." format performs 3× above average.'},{i:'📦',t:'<strong>Sold-out complaints rising +28% MoM.</strong> "Kapan restock" is trending in comments. Surfacing restock alerts on TikTok and Instagram before drops can reduce negative sentiment.'},{i:'🧵',t:'<strong>Threads on X outperform single tweets by 2.2×.</strong> Your X audience engages most with storytelling. Consider a weekly tea knowledge thread series.'}].forEach(item=>{ic.innerHTML+=`<div class="insight-row"><div class="insight-icon">${item.i}</div><div style="font-size:12px;color:var(--dark);line-height:1.6;">${item.t}</div></div>`;});
+
+// Animate all bars
+function triggerBars(){
+  document.querySelectorAll('.bar-fill[data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';});
+  document.querySelectorAll('.pct-fill[data-pct]').forEach(el=>{el.style.width=el.dataset.pct+'%';});
+  document.querySelectorAll('.funnel-fill[data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';});
+}
+setTimeout(triggerBars,500);
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)triggerBars();});},{threshold:0.1});
+document.querySelectorAll('.card').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
