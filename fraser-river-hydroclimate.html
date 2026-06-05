@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fraser River Hydroclimate — EOSC 442</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #050e1a;
+  --deep: #071828;
+  --ocean: #0a2744;
+  --tide: #0d3d6e;
+  --river: #1565a8;
+  --sky: #2e88d4;
+  --ice: #7fc4e8;
+  --frost: #b8dff2;
+  --mist: #e4f3fb;
+  --snow: #f2f8fc;
+  --gold: #e8b84b;
+  --amber: #d4943a;
+  --white: #ffffff;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--snow);
+  color: var(--night);
+  font-family: 'Source Serif 4', Georgia, serif;
+  overflow-x: hidden;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  background: var(--night);
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 120% 80% at 60% 30%, rgba(21,101,168,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 10% 80%, rgba(13,61,110,0.5) 0%, transparent 50%);
+}
+
+/* animated mountain silhouette */
+.mountains {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 45%;
+  opacity: 0.18;
+}
+
+.mountains svg { width: 100%; height: 100%; }
+
+/* snow particles */
+.particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: rgba(184,223,242,0.6);
+  animation: drift linear infinite;
+}
+
+@keyframes drift {
+  0%   { transform: translateY(-10px) translateX(0); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 0.5; }
+  100% { transform: translateY(100vh) translateX(30px); opacity: 0; }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: clamp(6rem,12vw,10rem) clamp(2rem,8vw,9rem) clamp(5rem,9vw,8rem);
+  max-width: 1300px;
+}
+
+.hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: rgba(46,136,212,0.15);
+  border: 1px solid rgba(46,136,212,0.3);
+  padding: 0.45rem 1rem;
+  margin-bottom: 2.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  color: var(--ice);
+  text-transform: uppercase;
+  opacity: 0;
+  animation: rise 0.8s 0.3s forwards;
+}
+
+.hero-chip::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.4rem,5.5vw,5.2rem);
+  font-weight: 800;
+  line-height: 1.02;
+  color: var(--white);
+  margin-bottom: 1.8rem;
+  opacity: 0;
+  animation: rise 0.9s 0.5s forwards;
+}
+
+.hero-title .accent { color: var(--gold); }
+
+.hero-desc {
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(184,223,242,0.7);
+  max-width: 540px;
+  line-height: 1.75;
+  margin-bottom: 3.5rem;
+  opacity: 0;
+  animation: rise 0.9s 0.7s forwards;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: rise 0.9s 0.9s forwards;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.meta-item .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: rgba(127,196,232,0.5);
+  text-transform: uppercase;
+}
+
+.meta-item .value {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.88rem;
+  color: rgba(184,223,242,0.85);
+  font-weight: 600;
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  right: 3rem;
+  bottom: 3rem;
+  z-index: 2;
+  writing-mode: vertical-lr;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: rgba(127,196,232,0.35);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: rise 1s 1.2s both;
+}
+
+.hero-scroll-indicator::after {
+  content: '';
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, var(--ice), transparent);
+}
+
+/* ── SHARED ── */
+section { padding: clamp(5rem,9vw,9rem) clamp(2rem,7vw,9rem); }
+
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--river);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.tag::before { content:''; width:2rem; height:1px; background:var(--river); }
+
+.h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.9rem,3.5vw,3.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--ocean);
+  margin-bottom: 3rem;
+}
+
+.body { font-size:clamp(1rem,1.3vw,1.15rem); line-height:1.85; font-weight:300; color:#2a4060; }
+.body + .body { margin-top: 1rem; }
+
+/* ── BACKGROUND ── */
+.bg-section { background: #fff; }
+
+.bg-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 5rem;
+  align-items: start;
+}
+@media(max-width:768px){ .bg-grid{ grid-template-columns:1fr; gap:3rem; } }
+
+.bg-list { list-style:none; margin-top:0.5rem; }
+.bg-list li {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(21,101,168,0.08);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 300;
+  color: #2a4060;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.bg-list li::before {
+  content: '→';
+  color: var(--sky);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.variable-cards { display:flex; flex-direction:column; gap:1.2rem; }
+
+.var-card {
+  background: var(--snow);
+  border-left: 3px solid var(--sky);
+  padding: 1.3rem 1.8rem;
+  transition: border-color 0.3s;
+}
+.var-card:hover { border-left-color: var(--gold); }
+.var-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ocean);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+.var-card p { font-size: 0.9rem; line-height: 1.65; font-weight: 300; color: #4a6080; }
+
+/* ── RESEARCH QUESTIONS ── */
+.rq-section {
+  background: var(--ocean);
+  position: relative;
+  overflow: hidden;
+}
+.rq-section::before {
+  content: 'RQ';
+  position: absolute;
+  right: -1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Syne', sans-serif;
+  font-size: 22rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.025);
+  line-height: 1;
+  pointer-events: none;
+}
+.rq-section .h2 { color: #fff; }
+.rq-section .tag { color: var(--ice); }
+.rq-section .tag::before { background: var(--ice); }
+
+.rq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+@media(max-width:700px){ .rq-grid{ grid-template-columns:1fr; } }
+
+.rq-card {
+  border: 1px solid rgba(127,196,232,0.15);
+  padding: 2.2rem 2.5rem;
+  position: relative;
+  transition: background 0.35s;
+}
+.rq-card:hover { background: rgba(127,196,232,0.06); }
+
+.rq-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+}
+.rq-card p { font-size: 1rem; line-height: 1.7; font-weight: 300; color: rgba(184,223,242,0.82); }
+
+/* ── METHODS ── */
+.methods-section { background: var(--mist); }
+
+.steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: rgba(21,101,168,0.12);
+  margin-bottom: 2.5rem;
+}
+@media(max-width:700px){ .steps{ grid-template-columns:1fr; } }
+
+.step {
+  background: #fff;
+  padding: 2.5rem;
+  transition: background 0.3s;
+}
+.step:hover { background: var(--snow); }
+
+.step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: var(--sky);
+  margin-bottom: 1rem;
+}
+.step h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ocean);
+  margin-bottom: 0.7rem;
+}
+.step p { font-size: 0.9rem; line-height: 1.7; font-weight: 300; color: #4a6080; }
+
+.callout {
+  background: var(--ocean);
+  color: rgba(184,223,242,0.85);
+  padding: 1.8rem 2.5rem;
+  font-size: 0.96rem;
+  line-height: 1.75;
+  font-weight: 300;
+}
+.callout strong { color: var(--gold); font-weight: 600; }
+
+/* ── RESULTS ── */
+.results-section { background: #fff; }
+
+.results-nav {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(21,101,168,0.12);
+  margin-bottom: 3rem;
+  overflow-x: auto;
+}
+.rnav-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.67rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8aaccc;
+  padding: 1rem 1.8rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.rnav-btn.active, .rnav-btn:hover { color: var(--ocean); border-bottom-color: var(--river); }
+
+.rpane { display: none; }
+.rpane.active { display: block; }
+
+.result-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+@media(max-width:768px){ .result-row{ grid-template-columns:1fr; } }
+
+.result-card {
+  border: 1px solid rgba(21,101,168,0.1);
+  padding: 2.5rem;
+}
+.result-card .fig-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+}
+.result-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ocean);
+  margin-bottom: 1rem;
+}
+.result-card .stat {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+}
+.stat.neg { color: var(--amber); }
+.stat.pos { color: var(--river); }
+
+.result-card p { font-size: 0.9rem; line-height: 1.7; font-weight: 300; color: #4a6060; }
+
+.interp-box {
+  background: var(--snow);
+  border-left: 3px solid var(--sky);
+  padding: 1.5rem 2rem;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: #2a4060;
+  font-weight: 300;
+}
+.interp-box strong { font-weight: 600; color: var(--ocean); }
+
+/* ── DISCUSSION ── */
+.disc-section {
+  background: var(--night);
+  position: relative;
+  overflow: hidden;
+}
+
+.disc-section .h2 { color: #fff; }
+.disc-section .tag { color: var(--ice); }
+.disc-section .tag::before { background: var(--ice); }
+
+.disc-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+@media(max-width:700px){ .disc-cols{ grid-template-columns:1fr; } }
+
+.disc-card {
+  border: 1px solid rgba(127,196,232,0.12);
+  padding: 2.5rem;
+}
+.disc-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+}
+.disc-card ul { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+.disc-card li {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  font-weight: 300;
+  color: rgba(184,223,242,0.75);
+  padding-left: 1.3rem;
+  position: relative;
+}
+.disc-card li::before { content: '—'; position: absolute; left: 0; color: var(--ice); opacity: 0.4; }
+
+.timing-magnitude {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: rgba(127,196,232,0.08);
+  margin-bottom: 2.5rem;
+}
+@media(max-width:700px){ .timing-magnitude{ grid-template-columns:1fr; } }
+
+.tm-card {
+  background: var(--deep);
+  padding: 3rem;
+  text-align: center;
+}
+.tm-card .tm-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+.tm-card .tm-r {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.5rem,5vw,4rem);
+  font-weight: 800;
+  color: var(--ice);
+  line-height: 1;
+  margin-bottom: 1.2rem;
+}
+.tm-card .tm-desc {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: rgba(127,196,232,0.55);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+.tm-card .tm-p {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(127,196,232,0.4);
+}
+.tm-card .tm-interp {
+  font-size: 0.88rem;
+  font-weight: 300;
+  color: rgba(184,223,242,0.65);
+  line-height: 1.7;
+  margin-top: 1.2rem;
+}
+
+.broader-box {
+  background: rgba(46,136,212,0.1);
+  border: 1px solid rgba(46,136,212,0.2);
+  padding: 2rem 2.5rem;
+}
+.broader-box .broader-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.7rem;
+}
+.broader-box p { font-size: 0.95rem; line-height: 1.75; font-weight: 300; color: rgba(184,223,242,0.75); }
+
+/* ── CONCLUSION ── */
+.conclusion-section { background: var(--mist); }
+
+.concl-blocks {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+}
+@media(max-width:900px){ .concl-blocks{ grid-template-columns:1fr; } }
+
+.concl-block {
+  background: #fff;
+  border-top: 3px solid var(--river);
+  padding: 2.5rem;
+  transition: border-top-color 0.3s;
+}
+.concl-block:hover { border-top-color: var(--gold); }
+.concl-block h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ocean);
+  margin-bottom: 1.2rem;
+}
+.concl-block p { font-size: 0.92rem; line-height: 1.75; font-weight: 300; color: #3a5070; }
+
+/* ── REFERENCES ── */
+.ref-section { background: var(--ocean); }
+.ref-section .h2 { color: rgba(184,223,242,0.9); font-size: 1.5rem; }
+.ref-section .tag { color: var(--ice); }
+.ref-section .tag::before { background: var(--ice); }
+
+.ref-list { list-style: none; display: flex; flex-direction: column; gap: 1.5rem; }
+.ref-list li {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  font-weight: 300;
+  color: rgba(184,223,242,0.65);
+  padding-left: 2rem;
+  position: relative;
+  border-bottom: 1px solid rgba(127,196,232,0.08);
+  padding-bottom: 1.5rem;
+}
+.ref-list li::before {
+  content: attr(data-n);
+  position: absolute;
+  left: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--gold);
+  top: 0.2rem;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--night);
+  padding: 2.5rem clamp(2rem,7vw,9rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-top: 1px solid rgba(127,196,232,0.08);
+}
+footer p {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: rgba(127,196,232,0.3);
+}
+footer .course {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: rgba(127,196,232,0.25);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes rise {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.on { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="mountains">
+    <svg viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="0,400 180,100 360,250 540,80 720,200 900,60 1080,180 1260,90 1440,160 1440,400" fill="rgba(46,136,212,0.5)"/>
+      <polygon points="0,400 100,220 280,320 450,160 620,280 800,120 950,240 1100,140 1300,220 1440,180 1440,400" fill="rgba(13,61,110,0.7)"/>
+    </svg>
+  </div>
+  <div class="particles" id="particles"></div>
+  <div class="hero-content">
+    <div class="hero-chip">EOSC 442 · Group 8 · 2026</div>
+    <h1 class="hero-title">Hydroclimate Associations<br>and Runoff Timing Shifts in<br><span class="accent">Fraser River</span> Discharge</h1>
+    <p class="hero-desc">Daily Correlation, Lag, and Peak-Flow Timing Analysis at Hope, British Columbia — 2013 to 2024</p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <span class="label">Location</span>
+        <span class="value">Fraser River at Hope, BC</span>
+      </div>
+      <div class="meta-item">
+        <span class="label">Period</span>
+        <span class="value">2013 – 2024</span>
+      </div>
+      <div class="meta-item">
+        <span class="label">Authors</span>
+        <span class="value">Kenrick · Kwon · Putra · Yu</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll-indicator">SCROLL</div>
+</section>
+
+<!-- BACKGROUND -->
+<section class="bg-section">
+  <div class="tag reveal">Background</div>
+  <h2 class="h2 reveal">Why the Fraser River at Hope?</h2>
+  <div class="bg-grid">
+    <div class="reveal">
+      <p class="body">The Fraser River at Hope drains a vast mountain basin and is a snowmelt-dominated system with strong, predictable seasonal discharge patterns. Understanding what controls those patterns has direct implications for flood risk, water supply, salmon ecosystems, and climate-change adaptation.</p>
+      <ul class="bg-list" style="margin-top:2rem">
+        <li>Discharge affects flood risk, water supply, and downstream ecosystems</li>
+        <li>The Fraser drains an enormous highland basin where winter precipitation accumulates as snowpack</li>
+        <li>Rising spring temperatures trigger rapid basin-wide snowmelt, driving the annual freshet</li>
+        <li>Understanding these controls helps predict how a warming climate will alter peak-flow timing and volume</li>
+      </ul>
+    </div>
+    <div class="variable-cards reveal">
+      <div class="var-card">
+        <h4>Temperature</h4>
+        <p>Controls the timing and rate of snowmelt. Clear seasonal cycle — cold winters, warm summers — repeating consistently year to year.</p>
+      </div>
+      <div class="var-card">
+        <h4>Snow Water Equivalent (SWE)</h4>
+        <p>Represents stored winter water at Mission Ridge. Builds through winter, peaks in spring, then collapses as melt releases the accumulated snowpack.</p>
+      </div>
+      <div class="var-card">
+        <h4>Precipitation</h4>
+        <p>Highly variable over time with many low-precipitation days and occasional extreme events. No clear seasonal pattern at the local Hope Airport station.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH QUESTIONS -->
+<section class="rq-section">
+  <div class="tag reveal">Research Questions</div>
+  <h2 class="h2 reveal">Four questions driving the analysis</h2>
+  <div class="rq-grid">
+    <div class="rq-card reveal">
+      <div class="rq-num">RQ 01</div>
+      <p>Is monthly discharge positively correlated with same-month precipitation at Hope?</p>
+    </div>
+    <div class="rq-card reveal">
+      <div class="rq-num">RQ 02</div>
+      <p>Is monthly discharge positively correlated with monthly mean temperature?</p>
+    </div>
+    <div class="rq-card reveal">
+      <div class="rq-num">RQ 03</div>
+      <p>Does a warmer spring (Mar–May) lead to an earlier annual peak discharge day-of-year?</p>
+    </div>
+    <div class="rq-card reveal">
+      <div class="rq-num">RQ 04</div>
+      <p>Does a higher winter snowpack (max SWE) increase spring–summer discharge (Apr–Aug)?</p>
+    </div>
+  </div>
+</section>
+
+<!-- METHODS -->
+<section class="methods-section">
+  <div class="tag reveal">Methods</div>
+  <h2 class="h2 reveal">Statistical approach</h2>
+  <div class="steps reveal">
+    <div class="step">
+      <div class="step-num">STEP 01</div>
+      <h3>Align Daily Series</h3>
+      <p>Standardized dates across all datasets, restricted variables to overlapping timestamps, and preserved missing values as NaN to maintain transparency.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 02</div>
+      <h3>Analyze Raw Data</h3>
+      <p>Plotted daily time series to check for seasonality, outliers, and data gaps before performing any statistical tests.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 03</div>
+      <h3>Build Analysis Variables</h3>
+      <p>Computed monthly mean discharge, monthly total precipitation, monthly mean temperature, and annual snowmelt metrics (peak day-of-year, winter max SWE).</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 04</div>
+      <h3>Test Each Research Question</h3>
+      <p>Applied Pearson correlations, p-values, linear fits, and lagged daily correlations spanning 0 to 14 days to systematically test each RQ.</p>
+    </div>
+  </div>
+  <div class="callout reveal">
+    <strong>Process-based annual tests:</strong> Peak discharge day-of-year vs spring mean temperature (Mar–May) and winter max SWE (Nov–Mar) vs spring–summer mean discharge (Apr–Aug) directly tested runoff timing and storage-release mechanisms. Monthly aggregation reduces daily noise, lag tests check short response delays, and annual metrics connect statistics to hydrologic mechanisms.
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="results-section">
+  <div class="tag reveal">Results</div>
+  <h2 class="h2 reveal">What the data showed</h2>
+  <div class="results-nav reveal">
+    <button class="rnav-btn active" onclick="switchR('r1',this)">RQ1 — Precipitation</button>
+    <button class="rnav-btn" onclick="switchR('r2',this)">RQ2 — Temperature</button>
+    <button class="rnav-btn" onclick="switchR('r3',this)">Lag Analysis</button>
+    <button class="rnav-btn" onclick="switchR('r4',this)">RQ3 — Peak Timing</button>
+    <button class="rnav-btn" onclick="switchR('r5',this)">RQ4 — Snowpack</button>
+  </div>
+
+  <div class="rpane active" id="r1">
+    <div class="result-row">
+      <div class="result-card">
+        <div class="fig-label">Figure 5 · RQ1</div>
+        <h4>Monthly Discharge vs Monthly Precipitation</h4>
+        <div class="stat neg">r = −0.45</div>
+        <p style="margin-bottom:0.8rem">p = 1.36 × 10⁻⁸ &nbsp;·&nbsp; n = 144 months</p>
+        <p>A significant but <em>negative</em> relationship — this did not support the predicted positive same-month rainfall-runoff relationship. Wetter months are actually associated with lower discharge.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;">
+        <div class="interp-box">
+          <strong>Interpretation:</strong> Same-month local precipitation at Hope is a weak proxy for basin-wide runoff generation. High-precipitation months are typically winter months when cold temperatures mean water is stored as snow, not released as runoff. Temperature better captures melt-season discharge behaviour.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rpane" id="r2">
+    <div class="result-row">
+      <div class="result-card">
+        <div class="fig-label">Figure 6 · RQ2</div>
+        <h4>Monthly Discharge vs Monthly Temperature</h4>
+        <div class="stat pos">r = +0.63</div>
+        <p style="margin-bottom:0.8rem">p = 4.49 × 10⁻¹⁷ &nbsp;·&nbsp; n = 144 months</p>
+        <p>A strong, highly significant positive relationship. Warmer months consistently show much higher discharge, directly consistent with snowmelt control of the seasonal hydrograph.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;">
+        <div class="interp-box">
+          <strong>Interpretation:</strong> Temperature is the dominant control on monthly discharge variability. As temperatures rise in spring and early summer, accumulated snowpack melts basin-wide, generating the large seasonal discharge pulse characteristic of the Fraser freshet. This mechanism overwhelms any local rainfall signal.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rpane" id="r3">
+    <div class="result-row">
+      <div class="result-card">
+        <div class="fig-label">Figure 7 · Lag 0–14 d</div>
+        <h4>Lagged Discharge vs Precipitation</h4>
+        <div class="stat neg" style="font-size:1.2rem">Weak negative at all lags</div>
+        <p style="margin:0.5rem 0 0.8rem">r ≈ −0.13 to −0.14 across all 0–14 day lags</p>
+        <p>Local precipitation at Hope is not a strong short-lag predictor of discharge at the basin outlet at any time delay from 0 to 14 days.</p>
+      </div>
+      <div class="result-card">
+        <div class="fig-label">Figure 8 · Lag 0–14 d</div>
+        <h4>Lagged Discharge vs Temperature</h4>
+        <div class="stat pos" style="font-size:1.2rem">Positive, strongest at lag 0</div>
+        <p style="margin:0.5rem 0 0.8rem">r ≈ 0.47–0.56 across lags; peaks at same-day</p>
+        <p>Temperature acted as a more immediate proxy for discharge variability than precipitation — confirming it captures the dominant melt-driven signal in this basin.</p>
+      </div>
+    </div>
+    <div class="interp-box">
+      <strong>Takeaway:</strong> The Fraser outlet integrates snow storage, travel time, and basin-scale averaging across a vast mountain catchment. Local rainfall at a single station simply cannot explain short-term discharge changes at the basin scale.
+    </div>
+  </div>
+
+  <div class="rpane" id="r4">
+    <div class="result-row">
+      <div class="result-card">
+        <div class="fig-label">Figure 9 · RQ3 · Annual</div>
+        <h4>Peak Timing vs Spring Temperature (Mar–May)</h4>
+        <div class="stat neg">r = −0.61</div>
+        <p style="margin-bottom:0.8rem">p = 0.0335</p>
+        <p>Warmer spring temperatures were significantly associated with an earlier peak discharge day-of-year — warmer springs advance the freshet, consistent with temperature-driven snowmelt accelerating the hydrograph.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;">
+        <div class="interp-box" style="height:100%">
+          <strong>Caveat:</strong> Annual tests use fewer data points (n ≈ 11 years) than monthly analyses, so the direction is informative but uncertainty is higher. The negative sign is physically consistent: warmer springs → earlier melt → freshet peak shifts to an earlier day of year. A 1°C warming corresponds to roughly 1–2 weeks of earlier peak timing.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rpane" id="r5">
+    <div class="result-row">
+      <div class="result-card">
+        <div class="fig-label">Figure 10 · RQ4 · Annual</div>
+        <h4>Winter Max SWE (Nov–Mar) vs Apr–Aug Discharge</h4>
+        <div class="stat pos">r = +0.66</div>
+        <p style="margin-bottom:0.8rem">p = 0.0273</p>
+        <p>Years with a larger winter snowpack at Mission Ridge consistently produced higher spring–summer discharge. Antecedent SWE is the primary reservoir controlling seasonal runoff magnitude.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;">
+        <div class="interp-box">
+          <strong>Mechanism:</strong> Deep winter snowpacks store water at elevation throughout the cold season. When spring arrives and temperatures cross the melt threshold, this stored water is released as runoff over weeks to months, setting the magnitude of the melt-season discharge pulse. Higher SWE → more stored water → higher Apr–Aug flows.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISCUSSION -->
+<section class="disc-section">
+  <div class="tag reveal">Discussion</div>
+  <h2 class="h2 reveal">The Fraser at Hope is a snowmelt-dominated system</h2>
+
+  <div class="disc-cols reveal">
+    <div class="disc-card">
+      <h3>Key Evidence</h3>
+      <ul>
+        <li>Annual discharge peaks coincide with spring–summer snowmelt (May–July), not with peak precipitation events</li>
+        <li>Temperature (r = 0.63) is a far stronger monthly predictor than precipitation (r = −0.45)</li>
+        <li>Wetter months are associated with lower discharge — opposite to a rainfall-runoff signal</li>
+        <li>Lagged correlations with precipitation remain weakly negative at all lags (0–14 days)</li>
+      </ul>
+    </div>
+    <div class="disc-card">
+      <h3>Why?</h3>
+      <ul>
+        <li>Precipitation at Hope Airport is local, but the Fraser drains a vast mountain basin spanning hundreds of kilometres</li>
+        <li>Winter precipitation falls as snow at elevation — stored as snowpack until spring temperatures rise</li>
+        <li>Rising spring temperatures trigger rapid snowmelt basin-wide, overwhelming any local rain signal at the gauge</li>
+        <li>The outlet integrates snow storage, melt rates, and travel time across the entire watershed</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="timing-magnitude reveal">
+    <div class="tm-card">
+      <div class="tm-label">Timing</div>
+      <div class="tm-r">r = −0.61</div>
+      <div class="tm-desc">Spring mean temperature (Mar–May)<br>vs peak discharge day-of-year</div>
+      <div class="tm-p">p = 0.034</div>
+      <div class="tm-interp">Warmer springs trigger earlier snowmelt across the basin, advancing the annual freshet peak by 1–2 weeks per °C of warming.</div>
+    </div>
+    <div class="tm-card">
+      <div class="tm-label">Magnitude</div>
+      <div class="tm-r">r = +0.66</div>
+      <div class="tm-desc">Winter max SWE (Nov–Mar)<br>vs spring–summer mean discharge (Apr–Aug)</div>
+      <div class="tm-p">p = 0.027</div>
+      <div class="tm-interp">Years with deeper snowpack release more water in spring–summer. Antecedent SWE is the primary reservoir for seasonal runoff.</div>
+    </div>
+  </div>
+
+  <div class="broader-box reveal">
+    <div class="broader-label">Broader Relevance</div>
+    <p>As British Columbia continues to warm, earlier and potentially lower peak flows will significantly impact hydroelectric power operations, salmon migration timing and spawning conditions, and agricultural water supply across the entire Fraser basin. These statistical relationships quantify the hydrologic sensitivity that managers and planners must contend with.</p>
+  </div>
+</section>
+
+<!-- CONCLUSION -->
+<section class="conclusion-section">
+  <div class="tag reveal">Conclusion</div>
+  <h2 class="h2 reveal">Three takeaways</h2>
+  <div class="concl-blocks reveal">
+    <div class="concl-block">
+      <h4>Temperature &gt; Precipitation</h4>
+      <p>Monthly discharge is much more strongly related to temperature (r = 0.63) than to local precipitation (r = −0.45). Warmer months bring higher flows; wetter months counterintuitively bring lower flows — a clear signature of snowmelt dominance.</p>
+    </div>
+    <div class="concl-block">
+      <h4>Spring Warmth Advances the Freshet</h4>
+      <p>Warmer spring temperatures (Mar–May) are significantly linked to earlier annual peak discharge (r = −0.61, p = 0.034). Temperature-driven snowmelt advances the hydrograph by an estimated 1–2 weeks per degree of warming.</p>
+    </div>
+    <div class="concl-block">
+      <h4>Snowpack Sets the Volume</h4>
+      <p>Years with greater winter SWE at Mission Ridge produce higher spring–summer discharge (r = 0.66, p = 0.027). Antecedent snowpack is the primary reservoir controlling seasonal runoff magnitude in the Fraser watershed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- REFERENCES -->
+<section class="ref-section">
+  <div class="tag">References</div>
+  <h2 class="h2">Sources</h2>
+  <ul class="ref-list">
+    <li data-n="01">Historical Climate Data. Environment and Climate Change Canada, station results for Hope Airport / Hope A. Accessed 7 Apr. 2026.</li>
+    <li data-n="02">Hydrometeorologic Data. BC Hydro, Mission Ridge station (B.C. Snow ID: 1C18P). Accessed 7 Apr. 2026.</li>
+    <li data-n="03">Snow Survey and Water Supply Bulletin – March 1st, 2026. Government of British Columbia, River Forecast Centre, 2026. Accessed 7 Apr. 2026.</li>
+    <li data-n="04">Station Reference Index – Water Level and Flow: Fraser River at Hope (08MF005). Water Survey of Canada, Environment and Climate Change Canada. Accessed 7 Apr. 2026.</li>
+  </ul>
+</section>
+
+<footer>
+  <span class="course">EOSC 442</span>
+  <p>Jonassen Kenrick · Jihye Kwon · I Putu Pramana Putra · Ziyu Yu</p>
+  <p>Fraser River at Hope, BC · 2013–2024</p>
+</footer>
+
+<script>
+// Snow particles
+const container = document.getElementById('particles');
+for (let i = 0; i < 40; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.top = Math.random() * 100 + '%';
+  p.style.animationDuration = (8 + Math.random() * 14) + 's';
+  p.style.animationDelay = (-Math.random() * 14) + 's';
+  p.style.opacity = 0.3 + Math.random() * 0.7;
+  p.style.width = p.style.height = (1.5 + Math.random() * 3) + 'px';
+  container.appendChild(p);
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); observer.unobserve(e.target); } });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Results tabs
+function switchR(id, btn) {
+  document.querySelectorAll('.rpane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.rnav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
