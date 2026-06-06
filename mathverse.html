@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MATHVERSE — 3D Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky1:#DDEFFF;--sky2:#BFD9FF;--sky3:#93C5FD;
+  --ground1:#4ADE80;--ground2:#22C55E;--ground3:#166534;
+  --sun:#FDE68A;--sun2:#FCA5A5;
+  --wall-bg:rgba(255,255,255,0.92);
+  --wall-border:rgba(99,102,241,0.3);
+  --wall-shadow:rgba(79,70,229,0.18);
+  --accent:#6366F1;--accent2:#8B5CF6;--accent3:#EC4899;
+  --gold:#F59E0B;--emerald:#10B981;--rose:#F43F5E;
+  --text-dark:#0F172A;--text-mid:#334155;--text-light:#64748B;
+  --modal-bg:rgba(15,23,42,0.96);
+  --modal-border:rgba(99,102,241,0.4);
+  --correct:#10B981;--wrong:#EF4444;
+  --night-sky1:#020617;--night-sky2:#0F0A2A;--night-sky3:#1E1B4B;
+  --path:#E2E8F0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--sky1);}
+body{font-family:'Space Grotesk',sans-serif;cursor:none;user-select:none;}
+
+/* ── CUSTOM CURSOR ── */
+#cur{
+  position:fixed;width:28px;height:28px;z-index:9999;
+  pointer-events:none;transform:translate(-50%,-50%);
+  transition:transform .1s ease;
+}
+#cur-ring{
+  width:100%;height:100%;border-radius:50%;
+  border:2px solid var(--accent);
+  position:absolute;
+  transition:width .2s,height .2s,opacity .2s;
+}
+#cur-dot{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:5px;height:5px;border-radius:50%;
+  background:var(--accent);
+}
+body:hover #cur{transform:translate(-50%,-50%);}
+
+/* ── WORLD WRAPPER ── */
+#world{
+  position:fixed;inset:0;
+  perspective:900px;
+  perspective-origin:50% 38%;
+  overflow:hidden;
+}
+
+/* ── SKY ── */
+#sky{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,var(--sky3) 0%,var(--sky2) 40%,var(--sky1) 100%);
+  transition:background 3s ease;
+  z-index:0;
+}
+#sky.night{background:linear-gradient(180deg,var(--night-sky1) 0%,var(--night-sky2) 50%,var(--night-sky3) 100%);}
+
+/* ── SUN ── */
+#sun{
+  position:absolute;top:8%;left:50%;transform:translateX(-50%);
+  z-index:1;pointer-events:none;
+  transition:opacity 2s;
+}
+.sun-core{
+  width:70px;height:70px;border-radius:50%;
+  background:radial-gradient(circle,#fff 20%,#FDE68A 55%,#FCA5A5 85%,transparent 100%);
+  box-shadow:0 0 60px 20px rgba(253,230,138,0.35),0 0 120px 40px rgba(253,230,138,0.12);
+  animation:sunFloat 6s ease-in-out infinite;
+}
+.sun-rays{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:120px;height:120px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(253,230,138,0.18) 30%,transparent 70%);
+  animation:sunFloat 6s ease-in-out infinite reverse;
+}
+@keyframes sunFloat{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+
+/* ── CLOUDS ── */
+.cloud{
+  position:absolute;z-index:2;pointer-events:none;
+  display:flex;gap:0;
+  animation:cloudDrift linear infinite;
+  transition:opacity 2s;
+}
+.cloud.night{opacity:0;}
+.cloud-puff{
+  background:rgba(255,255,255,0.88);
+  border-radius:50%;
+  backdrop-filter:blur(2px);
+}
+@keyframes cloudDrift{
+  from{transform:translateX(-300px);}
+  to{transform:translateX(calc(100vw + 300px));}
+}
+
+/* ── STARS ── */
+#stars{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  opacity:0;transition:opacity 2s;
+}
+#stars.show{opacity:1;}
+.star-dot{
+  position:absolute;background:#fff;border-radius:50%;
+  animation:starPulse ease-in-out infinite alternate;
+}
+@keyframes starPulse{from{opacity:.2;transform:scale(.7);}to{opacity:1;transform:scale(1.3);}}
+
+/* ── AURORA ── */
+#aurora{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  opacity:0;transition:opacity 2s;
+}
+#aurora.show{opacity:1;}
+.aur-band{
+  position:absolute;left:-30%;right:-30%;border-radius:50%;
+  animation:aurWave ease-in-out infinite alternate;
+  filter:blur(35px);
+}
+@keyframes aurWave{from{transform:skewX(0deg) translateY(0);}to{transform:skewX(3deg) translateY(-25px);}}
+
+/* ── 3D GROUND PLANE ── */
+#ground-plane{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:55%;
+  transform-origin:bottom center;
+  transform:rotateX(52deg) translateZ(-30px);
+  z-index:3;
+}
+.ground-surface{
+  position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(255,255,255,0.06) 0px,rgba(255,255,255,0.06) 1px,
+      transparent 1px,transparent 120px),
+    repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.06) 0px,rgba(255,255,255,0.06) 1px,
+      transparent 1px,transparent 120px),
+    linear-gradient(180deg,var(--ground1) 0%,var(--ground2) 50%,var(--ground3) 100%);
+  transition:background 3s;
+}
+.ground-surface.night{
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(255,255,255,0.04) 0,rgba(255,255,255,0.04) 1px,
+      transparent 1px,transparent 120px),
+    repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.04) 0,rgba(255,255,255,0.04) 1px,
+      transparent 1px,transparent 120px),
+    linear-gradient(180deg,#0d2818 0%,#071410 100%);
+}
+
+/* ── PATH ── */
+.path-strip{
+  position:absolute;
+  width:200px;
+  background:linear-gradient(90deg,rgba(241,245,249,0.8),rgba(241,245,249,0.4));
+  border-radius:4px;
+  left:50%;transform:translateX(-50%);
+  box-shadow:0 0 30px rgba(255,255,255,0.3);
+}
+
+/* ── TREES (3D CSS) ── */
+.tree3d{
+  position:absolute;
+  transform-style:preserve-3d;
+  cursor:default;
+  z-index:10;
+}
+.tree-trunk3d{
+  position:absolute;
+  bottom:0;left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,#92400E,#78350F,#92400E);
+  border-radius:3px;
+  box-shadow:inset -4px 0 8px rgba(0,0,0,0.3);
+}
+.tree-foliage{
+  position:absolute;
+  left:50%;transform:translateX(-50%);
+  border-radius:50% 50% 40% 40%;
+  overflow:hidden;
+}
+.tree-foliage::before{
+  content:'';position:absolute;inset:0;
+  background:inherit;filter:brightness(0.82);
+  clip-path:polygon(50% 100%,100% 0,0 0);
+}
+.tree-foliage::after{
+  content:'';
+  position:absolute;
+  top:15%;left:5%;right:5%;bottom:10%;
+  border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  transform:rotate(-15deg);
+}
+
+/* ── LAMPS (decorative) ── */
+.lamp-post{position:absolute;z-index:11;}
+.lamp-pole{
+  width:4px;border-radius:2px;
+  background:linear-gradient(180deg,#94A3B8,#64748B);
+  margin:0 auto;
+}
+.lamp-head{
+  width:18px;height:10px;
+  background:linear-gradient(180deg,#FDE68A,#FCA5A5);
+  border-radius:50% 50% 20% 20%;
+  margin:0 auto;
+  box-shadow:0 0 12px 4px rgba(253,230,138,0.5);
+  animation:lampGlow 3s ease-in-out infinite alternate;
+}
+@keyframes lampGlow{from{box-shadow:0 0 12px 4px rgba(253,230,138,0.4);}to{box-shadow:0 0 20px 8px rgba(253,230,138,0.7);}}
+
+/* ── MATH WALLS (3D cards) ── */
+.wall-wrap{
+  position:absolute;
+  z-index:15;
+  transform-style:preserve-3d;
+  perspective:600px;
+}
+.math-wall{
+  position:relative;
+  background:var(--wall-bg);
+  border:1.5px solid var(--wall-border);
+  border-radius:18px;
+  cursor:pointer;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1),
+             box-shadow .35s ease,
+             border-color .35s;
+  box-shadow:
+    0 4px 0 rgba(99,102,241,0.2),
+    0 8px 32px var(--wall-shadow),
+    0 0 0 0 transparent,
+    inset 0 1px 0 rgba(255,255,255,0.8);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:14px 12px 10px;
+  backdrop-filter:blur(12px);
+  overflow:hidden;
+  transform:rotateY(0deg);
+}
+.math-wall::before{
+  content:'';position:absolute;inset:0;border-radius:18px;
+  background:linear-gradient(135deg,rgba(99,102,241,0.08) 0%,transparent 60%);
+  pointer-events:none;
+}
+.math-wall::after{
+  content:'';
+  position:absolute;bottom:-2px;left:8px;right:8px;height:6px;
+  background:rgba(99,102,241,0.15);
+  border-radius:0 0 14px 14px;
+  filter:blur(4px);
+}
+.math-wall:hover{
+  transform:translateY(-12px) rotateY(3deg) scale(1.04);
+  box-shadow:
+    0 20px 0 rgba(99,102,241,0.12),
+    0 24px 50px rgba(79,70,229,0.28),
+    0 0 0 2px rgba(99,102,241,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  border-color:var(--accent);
+}
+.math-wall.solved{
+  background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(5,150,105,0.06));
+  border-color:rgba(16,185,129,0.4);
+}
+.math-wall.solved::before{background:linear-gradient(135deg,rgba(16,185,129,0.1) 0%,transparent 60%);}
+
+.wall-chip{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;
+  padding:3px 8px;border-radius:20px;
+  margin-bottom:7px;
+}
+.wall-title{
+  font-family:'Syne',sans-serif;
+  font-size:11px;font-weight:700;
+  color:var(--text-dark);
+  text-align:center;margin-bottom:4px;
+  line-height:1.2;
+}
+.wall-formula{
+  font-family:'JetBrains Mono',monospace;
+  font-size:14px;font-weight:700;
+  color:var(--accent);
+  text-align:center;line-height:1.2;
+  margin-bottom:3px;
+  text-shadow:0 0 20px rgba(99,102,241,0.25);
+}
+.wall-sub{
+  font-size:7.5px;color:var(--text-light);
+  text-align:center;line-height:1.4;
+  font-weight:500;
+}
+.wall-solved-badge{
+  position:absolute;top:7px;right:7px;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--correct);
+  display:none;align-items:center;justify-content:center;
+  color:#fff;font-size:9px;font-weight:700;
+}
+.math-wall.solved .wall-solved-badge{display:flex;}
+
+/* active pulse on nearest wall */
+.wall-pulse .math-wall{
+  animation:wallPulse 2s ease-in-out infinite;
+}
+@keyframes wallPulse{
+  0%,100%{box-shadow:0 8px 32px var(--wall-shadow),0 0 0 0 rgba(99,102,241,0.4);}
+  50%{box-shadow:0 8px 32px var(--wall-shadow),0 0 0 8px rgba(99,102,241,0);}
+}
+
+/* ── PLAYER ── */
+#player-wrap{
+  position:absolute;z-index:30;
+  transform-style:preserve-3d;
+  transition:left .18s ease,bottom .18s ease;
+}
+.player-shadow{
+  position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+  width:40px;height:12px;border-radius:50%;
+  background:rgba(0,0,0,0.18);
+  filter:blur(3px);
+  transition:width .2s,opacity .2s;
+}
+.player-3d{
+  display:flex;flex-direction:column;align-items:center;
+  transform-style:preserve-3d;
+  animation:playerBob 1.8s ease-in-out infinite;
+}
+@keyframes playerBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+.p-head{
+  width:32px;height:32px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#FFEDD5,#FCD34D 40%,#F97316);
+  border:2px solid rgba(249,115,22,0.4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;box-shadow:0 4px 12px rgba(0,0,0,0.15),inset 0 2px 4px rgba(255,255,255,0.4);
+  position:relative;
+}
+.p-head::after{
+  content:'';
+  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  width:36px;height:12px;border-radius:6px 6px 0 0;
+  background:linear-gradient(180deg,var(--accent),var(--accent2));
+  box-shadow:0 -3px 8px rgba(99,102,241,0.4);
+}
+.p-body{
+  width:28px;height:36px;
+  background:linear-gradient(180deg,var(--accent) 0%,var(--accent2) 100%);
+  border-radius:6px;margin-top:3px;
+  box-shadow:0 4px 12px rgba(99,102,241,0.3),inset 2px 0 6px rgba(255,255,255,0.15);
+  position:relative;
+}
+.p-body::before,.p-body::after{
+  content:'';position:absolute;
+  top:8px;width:10px;height:22px;
+  background:linear-gradient(180deg,var(--accent2),#7C3AED);
+  border-radius:4px;
+  box-shadow:0 3px 8px rgba(99,102,241,0.3);
+}
+.p-body::before{left:-11px;transform:rotate(-8deg);}
+.p-body::after{right:-11px;transform:rotate(8deg);}
+.p-legs{display:flex;gap:5px;margin-top:3px;}
+.p-leg{
+  width:11px;height:20px;
+  background:linear-gradient(180deg,#334155,#1E293B);
+  border-radius:4px 4px 5px 5px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.2);
+}
+.p-leg:first-child{animation:legWalk .5s ease-in-out infinite alternate;}
+.p-leg:last-child{animation:legWalk .5s ease-in-out infinite alternate-reverse;}
+@keyframes legWalk{from{transform:rotate(-12deg);}to{transform:rotate(12deg);}}
+.p-label{
+  position:absolute;top:-26px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;
+  padding:3px 10px;border-radius:20px;white-space:nowrap;
+  box-shadow:0 4px 12px rgba(99,102,241,0.35);letter-spacing:.05em;
+}
+
+/* ── NPCs ── */
+.npc-wrap{
+  position:absolute;z-index:20;
+  display:flex;flex-direction:column;align-items:center;
+  animation:npcFloat ease-in-out infinite;
+}
+@keyframes npcFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.npc-bubble{
+  background:rgba(255,255,255,0.95);
+  border:1px solid rgba(99,102,241,0.2);
+  border-radius:12px;padding:5px 10px;
+  font-size:10px;font-weight:600;color:var(--text-mid);
+  margin-bottom:6px;white-space:nowrap;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  position:relative;
+}
+.npc-bubble::after{
+  content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:rgba(99,102,241,0.2);
+}
+.npc-body{
+  display:flex;flex-direction:column;align-items:center;
+}
+.npc-head{
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.12);
+}
+.npc-torso{
+  width:20px;height:28px;border-radius:4px;margin-top:2px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.12);
+}
+.npc-legs{display:flex;gap:3px;margin-top:2px;}
+.npc-leg{width:8px;height:16px;border-radius:3px 3px 4px 4px;background:#334155;}
+
+/* ── PROGRESS BAR ── */
+#progress-ring{
+  position:fixed;top:18px;left:50%;transform:translateX(-50%);
+  z-index:200;
+  background:rgba(255,255,255,0.92);
+  border:1px solid rgba(99,102,241,0.2);
+  border-radius:100px;
+  padding:8px 20px;
+  display:flex;align-items:center;gap:16px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.08),0 1px 0 rgba(255,255,255,0.8) inset;
+  backdrop-filter:blur(12px);
+}
+.pr-item{
+  display:flex;align-items:center;gap:6px;
+  font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--text-dark);
+}
+.pr-icon{font-size:14px;}
+.pr-val{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;padding:2px 9px;border-radius:20px;
+  font-size:11px;font-weight:700;min-width:28px;text-align:center;
+}
+.pr-divider{width:1px;height:18px;background:rgba(99,102,241,0.15);}
+.pr-progress-bar{
+  width:100px;height:6px;background:rgba(99,102,241,0.1);
+  border-radius:3px;overflow:hidden;
+}
+.pr-progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:3px;
+  transition:width .6s cubic-bezier(.34,1.2,.64,1);
+  box-shadow:0 0 8px rgba(99,102,241,0.4);
+}
+
+/* ── HINT BAR ── */
+#hint-bar{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  z-index:200;
+  background:rgba(15,23,42,0.82);
+  border:1px solid rgba(99,102,241,0.3);
+  border-radius:100px;
+  padding:8px 22px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:rgba(255,255,255,0.7);
+  letter-spacing:.06em;
+  backdrop-filter:blur(12px);
+  display:flex;gap:18px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  transition:opacity .5s;
+}
+.hint-key{
+  background:rgba(99,102,241,0.25);
+  border:1px solid rgba(99,102,241,0.4);
+  border-radius:5px;padding:1px 7px;
+  font-size:10px;color:rgba(255,255,255,0.9);
+  margin-right:5px;
+}
+
+/* ── PROXIMITY INDICATOR ── */
+#prox{
+  position:fixed;bottom:20%;left:50%;transform:translateX(-50%);
+  z-index:200;
+  background:linear-gradient(135deg,rgba(99,102,241,0.95),rgba(139,92,246,0.95));
+  border-radius:16px;padding:10px 22px;
+  font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:#fff;
+  letter-spacing:.04em;
+  display:none;
+  box-shadow:0 8px 24px rgba(99,102,241,0.4);
+  animation:proxPop .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes proxPop{from{transform:translateX(-50%) scale(.7);opacity:0;}to{transform:translateX(-50%) scale(1);opacity:1;}}
+
+/* ── MODAL ── */
+#overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(2,6,23,0.75);
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(16px);
+}
+#overlay.show{display:flex;}
+.modal-card{
+  background:linear-gradient(145deg,rgba(15,23,42,0.98),rgba(30,27,75,0.98));
+  border:1px solid var(--modal-border);
+  border-radius:28px;
+  max-width:520px;width:94%;
+  padding:0;overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(99,102,241,0.1),inset 0 1px 0 rgba(255,255,255,0.06);
+  animation:modalIn .4s cubic-bezier(.34,1.56,.64,1);
+  position:relative;
+}
+@keyframes modalIn{from{transform:scale(.85) translateY(30px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+.modal-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:200px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(99,102,241,0.2) 0%,transparent 70%);
+  pointer-events:none;
+}
+.modal-header{
+  padding:28px 28px 0;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  padding-bottom:20px;
+  margin-bottom:20px;
+  position:relative;
+}
+.modal-tag{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:.18em;text-transform:uppercase;
+  padding:4px 12px;border-radius:20px;
+  background:rgba(99,102,241,0.15);
+  border:1px solid rgba(99,102,241,0.3);
+  color:rgba(165,180,252,1);
+  margin-bottom:12px;
+}
+.modal-formula-display{
+  font-family:'JetBrains Mono',monospace;
+  font-size:26px;font-weight:700;color:#fff;
+  line-height:1.2;margin-bottom:8px;
+  text-shadow:0 0 40px rgba(165,180,252,0.4);
+}
+.modal-title-main{
+  font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
+  color:#fff;margin-bottom:4px;
+}
+.modal-fact-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;color:rgba(203,213,225,0.8);
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:10px;padding:6px 12px;
+  line-height:1.4;margin-top:8px;font-weight:400;
+}
+.modal-close{
+  position:absolute;top:20px;right:20px;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  color:rgba(255,255,255,0.5);font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;
+}
+.modal-close:hover{background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.4);color:#EF4444;}
+.modal-body{padding:0 28px 28px;}
+.modal-question{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:700;
+  color:#fff;text-align:center;margin-bottom:20px;line-height:1.5;
+}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.opt-btn{
+  font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;
+  padding:14px 10px;border-radius:14px;
+  border:1.5px solid rgba(99,102,241,0.2);
+  background:rgba(255,255,255,0.04);
+  color:rgba(203,213,225,1);
+  cursor:pointer;text-align:center;
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
+  position:relative;overflow:hidden;
+}
+.opt-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(99,102,241,0.12),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.opt-btn:hover:not(:disabled){
+  border-color:rgba(99,102,241,0.5);
+  background:rgba(99,102,241,0.12);
+  transform:translateY(-2px) scale(1.02);
+  color:#fff;
+}
+.opt-btn:hover::before{opacity:1;}
+.opt-btn.correct{
+  border-color:var(--correct);background:rgba(16,185,129,0.15);
+  color:#6EE7B7;transform:scale(1.03);
+  box-shadow:0 0 20px rgba(16,185,129,0.2);
+}
+.opt-btn.wrong{
+  border-color:var(--wrong);background:rgba(239,68,68,0.12);
+  color:#FCA5A5;
+}
+.opt-btn:disabled{cursor:not-allowed;opacity:.8;}
+.modal-msg{
+  text-align:center;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;
+  min-height:22px;letter-spacing:.02em;
+}
+.modal-streak{
+  position:absolute;top:20px;left:28px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:rgba(165,180,252,0.6);letter-spacing:.1em;
+}
+
+/* ── CELEBRATION ── */
+#celebrate{
+  position:fixed;inset:0;z-index:800;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .4s;
+}
+#celebrate.show{opacity:1;}
+.cel-text{
+  font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,4rem);
+  font-weight:800;color:#fff;text-align:center;
+  text-shadow:0 0 40px rgba(99,102,241,0.8),0 4px 0 rgba(0,0,0,0.2);
+  animation:celPop .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes celPop{from{transform:scale(.3);opacity:0;}to{transform:scale(1);opacity:1;}}
+.cel-sub{
+  font-family:'JetBrains Mono',monospace;font-size:1rem;
+  color:rgba(165,180,252,0.9);margin-top:.5rem;letter-spacing:.1em;
+}
+.confetti-piece{
+  position:fixed;pointer-events:none;z-index:850;
+  border-radius:3px;
+  animation:confettiFall ease-in forwards;
+}
+@keyframes confettiFall{
+  0%{transform:translateY(-30px) rotate(0deg);opacity:1;}
+  100%{transform:translateY(100vh) rotate(720deg);opacity:0;}
+}
+.score-float{
+  position:fixed;pointer-events:none;z-index:900;
+  font-family:'Syne',sans-serif;font-size:28px;font-weight:800;
+  color:#fff;text-shadow:0 0 20px var(--gold),2px 2px 0 rgba(0,0,0,0.2);
+  animation:scoreFloat 1.8s ease-out forwards;
+}
+@keyframes scoreFloat{
+  0%{opacity:1;transform:translateY(0) scale(1);}
+  100%{opacity:0;transform:translateY(-100px) scale(1.3);}
+}
+
+/* ── LEVEL UP TOAST ── */
+#toast{
+  position:fixed;top:80px;right:20px;z-index:700;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border-radius:16px;
+  padding:14px 20px;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:13px;
+  box-shadow:0 8px 24px rgba(99,102,241,0.45);
+  transform:translateX(140%);
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+#toast.show{transform:translateX(0);}
+</style>
+</head>
+<body>
+
+<div id="cur"><div id="cur-ring"></div><div id="cur-dot"></div></div>
+
+<!-- PROGRESS HUD -->
+<div id="progress-ring">
+  <div class="pr-item"><span class="pr-icon">⭐</span>Score<span class="pr-val" id="hScore">0</span></div>
+  <div class="pr-divider"></div>
+  <div class="pr-item"><span class="pr-icon">🧩</span>Solved<span class="pr-val" id="hSolved">0</span></div>
+  <div class="pr-divider"></div>
+  <div class="pr-item"><span class="pr-icon">🔥</span>Streak<span class="pr-val" id="hStreak">0</span></div>
+  <div class="pr-divider"></div>
+  <div class="pr-item" style="gap:8px;">
+    <div class="pr-progress-bar"><div class="pr-progress-fill" id="progFill" style="width:0%"></div></div>
+    <span style="font-size:10px;color:var(--text-light);font-weight:600;" id="progTxt">0/18</span>
+  </div>
+</div>
+
+<div id="toast">🌟 LEVEL UP! New walls unlocked!</div>
+
+<!-- WORLD -->
+<div id="world">
+  <div id="sky" class="morning"></div>
+  <div id="sun"><div class="sun-rays"></div><div class="sun-core"></div></div>
+  <div id="stars"></div>
+  <div id="aurora"></div>
+  <div id="ground-plane"><div class="ground-surface" id="gsurf"></div></div>
+  <div id="scene-objects"></div>
+</div>
+
+<!-- HINT -->
+<div id="hint-bar">
+  <span><span class="hint-key">←→</span>Walk</span>
+  <span><span class="hint-key">Click</span>Open Wall</span>
+  <span><span class="hint-key">ESC</span>Close</span>
+</div>
+
+<!-- PROXIMITY -->
+<div id="prox">📐 Click to solve this challenge!</div>
+
+<!-- MODAL -->
+<div id="overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-streak" id="mStreak"></div>
+      <div class="modal-tag" id="mTag">CHALLENGE</div>
+      <div class="modal-formula-display" id="mFormula"></div>
+      <div class="modal-title-main" id="mTitle"></div>
+      <div class="modal-fact-pill" id="mFact"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-question" id="mQ"></div>
+      <div class="opts-grid" id="mOpts"></div>
+      <div class="modal-msg" id="mMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CELEBRATION -->
+<div id="celebrate">
+  <div class="cel-text" id="celText">✨ CORRECT!</div>
+  <div class="cel-sub" id="celSub">+20 points</div>
+</div>
+
+<script>
+// ═══════════════════════════════
+//  CURSOR
+// ═══════════════════════════════
+const cur=document.getElementById('cur');
+const curRing=document.getElementById('cur-ring');
+document.addEventListener('mousemove',e=>{
+  cur.style.left=e.clientX+'px';
+  cur.style.top=e.clientY+'px';
+});
+document.addEventListener('mousedown',()=>{
+  curRing.style.transform='scale(0.7)';
+  curRing.style.opacity='0.5';
+});
+document.addEventListener('mouseup',()=>{
+  curRing.style.transform='scale(1)';
+  curRing.style.opacity='1';
+});
+
+// ═══════════════════════════════
+//  MATH DATA — 18 walls
+// ═══════════════════════════════
+const WALLS=[
+  {
+    title:'Pythagorean Theorem',formula:'a²+b²=c²',chip:'GEOMETRY',
+    fact:'Used by ancient Egyptians 4000 years ago to build the pyramids perfectly.',
+    color:'#6366F1',chipBg:'rgba(99,102,241,0.1)',chipColor:'#818CF8',
+    questions:[
+      {q:'If a=3, b=4, what is c?',opts:['5','6','7','8'],ans:0},
+      {q:'If a=5, b=12, what is c?',opts:['13','15','11','14'],ans:0},
+      {q:'If c=13, a=5, what is b?',opts:['12','10','11','8'],ans:0},
+    ]
+  },
+  {
+    title:'Area of a Circle',formula:'A = πr²',chip:'GEOMETRY',
+    fact:'π goes on forever — trillions of digits have been computed!',
+    color:'#8B5CF6',chipBg:'rgba(139,92,246,0.1)',chipColor:'#A78BFA',
+    questions:[
+      {q:'Area with r=7? (round to 1 dp)',opts:['153.9','78.5','44.0','201.1'],ans:0},
+      {q:'If A=314, what is r? (approx)',opts:['10','5','15','8'],ans:0},
+      {q:'Circle C=2πr. If r=5, C≈?',opts:['31.4','15.7','62.8','10'],ans:0},
+    ]
+  },
+  {
+    title:'Fibonacci Sequence',formula:'Fₙ=Fₙ₋₁+Fₙ₋₂',chip:'SEQUENCES',
+    fact:'The ratio of consecutive Fibonacci numbers approaches φ = 1.618…',
+    color:'#EC4899',chipBg:'rgba(236,72,153,0.1)',chipColor:'#F472B6',
+    questions:[
+      {q:'What comes after 8, 13?',opts:['21','20','18','25'],ans:0},
+      {q:'What is the 7th Fibonacci number? (1,1,2,3…)',opts:['13','12','11','8'],ans:0},
+      {q:'Sum of first 5 terms (1+1+2+3+5)?',opts:['12','10','11','13'],ans:0},
+    ]
+  },
+  {
+    title:"Euler's Identity",formula:'eⁱᵖ + 1 = 0',chip:'ANALYSIS',
+    fact:'Richard Feynman called it "the most remarkable formula in mathematics."',
+    color:'#F59E0B',chipBg:'rgba(245,158,11,0.1)',chipColor:'#FCD34D',
+    questions:[
+      {q:'e ≈ (to 3 decimal places)?',opts:['2.718','3.141','1.618','2.414'],ans:0},
+      {q:'What does i represent?',opts:['√−1','√2','−1','1/i'],ans:0},
+      {q:'eⁱᵖ equals?',opts:['−1','0','1','i'],ans:0},
+    ]
+  },
+  {
+    title:'Standard Deviation',formula:'σ=√(Σ(x−μ)²/N)',chip:'STATISTICS',
+    fact:'σ=0 means all values are identical. Large σ means data is widely spread.',
+    color:'#10B981',chipBg:'rgba(16,185,129,0.1)',chipColor:'#34D399',
+    questions:[
+      {q:'σ of the dataset {2,2,2,2}?',opts:['0','1','2','4'],ans:0},
+      {q:'Mean (μ) of {4,8,6,10,2}?',opts:['6','5','8','7'],ans:0},
+      {q:'What does variance equal?',opts:['σ²','σ/2','2σ','σ+1'],ans:0},
+    ]
+  },
+  {
+    title:'Golden Ratio',formula:'φ=(1+√5)/2',chip:'PATTERNS',
+    fact:'φ appears in the Parthenon, Mona Lisa, sunflower seeds, and nautilus shells.',
+    color:'#F43F5E',chipBg:'rgba(244,63,94,0.1)',chipColor:'#FB7185',
+    questions:[
+      {q:'φ to 3 decimal places?',opts:['1.618','1.414','1.732','2.000'],ans:0},
+      {q:'1/φ equals?',opts:['φ−1','φ+1','1/2','2−φ'],ans:0},
+      {q:'φ² = φ + ?',opts:['1','2','φ','0'],ans:0},
+    ]
+  },
+  {
+    title:"Bayes' Theorem",formula:"P(A|B)=P(B|A)P(A)/P(B)",chip:'PROBABILITY',
+    fact:'Bayes\' theorem underlies spam filters, medical tests, and AI!',
+    color:'#06B6D4',chipBg:'rgba(6,182,212,0.1)',chipColor:'#67E8F9',
+    questions:[
+      {q:'P(B|A)=0.9, P(A)=0.1, P(B)=0.5 → P(A|B)?',opts:['0.18','0.09','0.5','0.45'],ans:0},
+      {q:'Bayes updates what with new evidence?',opts:['Beliefs','Data','Variance','Mean'],ans:0},
+      {q:'Prior × Likelihood / Evidence = ?',opts:['Posterior','Prior','Variance','Median'],ans:0},
+    ]
+  },
+  {
+    title:'Quadratic Formula',formula:'x=(-b±√(b²-4ac))/2a',chip:'ALGEBRA',
+    fact:'The discriminant b²-4ac tells you how many real roots exist.',
+    color:'#84CC16',chipBg:'rgba(132,204,22,0.1)',chipColor:'#A3E635',
+    questions:[
+      {q:'Discriminant of x²-4x+4=0?',opts:['0','4','16','-4'],ans:0},
+      {q:'If disc.<0, how many real roots?',opts:['0','1','2','∞'],ans:0},
+      {q:'Roots of x²-5x+6=0?',opts:['2 and 3','1 and 6','-2 and -3','4 and 1'],ans:0},
+    ]
+  },
+  {
+    title:'Logarithm Rules',formula:'log(ab)=log a+log b',chip:'ANALYSIS',
+    fact:'Logarithms (1614) turned multiplication into addition — revolutionising astronomy!',
+    color:'#A855F7',chipBg:'rgba(168,85,247,0.1)',chipColor:'#C084FC',
+    questions:[
+      {q:'log₁₀(1000) = ?',opts:['3','2','4','10'],ans:0},
+      {q:'log₂(8) = ?',opts:['3','4','2','8'],ans:0},
+      {q:'log_b(1) always equals?',opts:['0','1','b','∞'],ans:0},
+    ]
+  },
+  {
+    title:"Newton's Laws",formula:'F = ma',chip:'PHYSICS MATH',
+    fact:'F=ma is Newton\'s 2nd law — the most famous equation in classical physics.',
+    color:'#EF4444',chipBg:'rgba(239,68,68,0.1)',chipColor:'#FCA5A5',
+    questions:[
+      {q:'F=? when m=5 kg, a=3 m/s²',opts:['15 N','8 N','2 N','20 N'],ans:0},
+      {q:'a=? when F=20 N, m=4 kg',opts:['5 m/s²','4 m/s²','80 m/s²','2 m/s²'],ans:0},
+      {q:'m=? when F=30 N, a=6 m/s²',opts:['5 kg','4 kg','3 kg','8 kg'],ans:0},
+    ]
+  },
+  {
+    title:'Compound Interest',formula:'A=P(1+r/n)ⁿᵗ',chip:'FINANCE MATH',
+    fact:'Einstein allegedly called compound interest "the 8th wonder of the world."',
+    color:'#0EA5E9',chipBg:'rgba(14,165,233,0.1)',chipColor:'#38BDF8',
+    questions:[
+      {q:'P=100, r=0.1, n=1, t=1. A=?',opts:['110','111','105','120'],ans:0},
+      {q:'Doubling time (approx) at 7% = ?',opts:['10 yrs','7 yrs','14 yrs','20 yrs'],ans:0},
+      {q:'72/r gives the approximate?',opts:['Doubling time','Tripling time','Half-life','Growth'],ans:0},
+    ]
+  },
+  {
+    title:'Derivative (Calculus)',formula:"f'(x)=lim Δx→0 Δf/Δx",chip:'CALCULUS',
+    fact:'Newton invented calculus to describe planetary motion in 1666!',
+    color:'#D946EF',chipBg:'rgba(217,70,239,0.1)',chipColor:'#E879F9',
+    questions:[
+      {q:"d/dx[x³] = ?",opts:['3x²','x²','3x','x³'],ans:0},
+      {q:"d/dx[sin x] = ?",opts:['cos x','-cos x','-sin x','tan x'],ans:0},
+      {q:"d/dx[eˣ] = ?",opts:['eˣ','xeˣ','eˣ⁻¹','1/eˣ'],ans:0},
+    ]
+  },
+  {
+    title:'Binomial Theorem',formula:'(a+b)ⁿ=ΣC(n,k)aᵏbⁿ⁻ᵏ',chip:'ALGEBRA',
+    fact:'Pascal\'s Triangle rows give you the binomial coefficients!',
+    color:'#6366F1',chipBg:'rgba(99,102,241,0.1)',chipColor:'#818CF8',
+    questions:[
+      {q:'(1+1)⁴ = ?',opts:['16','8','12','4'],ans:0},
+      {q:'C(5,2) = ?',opts:['10','5','20','15'],ans:0},
+      {q:'Expand (a+b)²?',opts:['a²+2ab+b²','a²+b²','2a+2b','a²-b²'],ans:0},
+    ]
+  },
+  {
+    title:'Prime Numbers',formula:'∞ primes (Euclid, 300 BC)',chip:'NUMBER THEORY',
+    fact:'The largest known prime has over 24 million digits — found in 2018!',
+    color:'#10B981',chipBg:'rgba(16,185,129,0.1)',chipColor:'#34D399',
+    questions:[
+      {q:'Which is NOT prime?',opts:['9','7','11','13'],ans:0},
+      {q:'How many primes < 10?',opts:['4','3','5','2'],ans:0},
+      {q:'What is the 5th prime?',opts:['11','9','13','7'],ans:0},
+    ]
+  },
+  {
+    title:'Trigonometry',formula:'sin²θ+cos²θ=1',chip:'TRIGONOMETRY',
+    fact:'The word sine comes from the Latin "sinus" meaning curve or bay.',
+    color:'#F59E0B',chipBg:'rgba(245,158,11,0.1)',chipColor:'#FCD34D',
+    questions:[
+      {q:'sin(30°) = ?',opts:['0.5','√2/2','√3/2','1'],ans:0},
+      {q:'cos(60°) = ?',opts:['0.5','0','1','√3/2'],ans:0},
+      {q:'tan(45°) = ?',opts:['1','0','√2','∞'],ans:0},
+    ]
+  },
+  {
+    title:'Matrix Multiplication',formula:'(AB)ᵢⱼ=Σ AᵢₖBₖⱼ',chip:'LINEAR ALGEBRA',
+    fact:'Matrix multiplication is NOT commutative — AB ≠ BA in general!',
+    color:'#EC4899',chipBg:'rgba(236,72,153,0.1)',chipColor:'#F472B6',
+    questions:[
+      {q:'Is AB always equal to BA?',opts:['No','Yes','Sometimes','Always'],ans:0},
+      {q:'Identity matrix effect on A?',opts:['Returns A','Returns 0','Returns Aᵀ','Doubles A'],ans:0},
+      {q:'det([[2,0],[0,3]]) = ?',opts:['6','5','0','1'],ans:0},
+    ]
+  },
+  {
+    title:'Central Limit Theorem',formula:'X̄~N(μ, σ²/n)',chip:'STATISTICS',
+    fact:'The CLT is why the normal distribution appears everywhere in nature!',
+    color:'#06B6D4',chipBg:'rgba(6,182,212,0.1)',chipColor:'#67E8F9',
+    questions:[
+      {q:'As n→∞, sample mean distribution becomes?',opts:['Normal','Uniform','Skewed','Bimodal'],ans:0},
+      {q:'CLT applies for any population?',opts:['Yes','No','Only normal','Only integers'],ans:0},
+      {q:'Standard error = σ / ?',opts:['√n','n','n²','2n'],ans:0},
+    ]
+  },
+  {
+    title:'Integral (Calculus)',formula:'∫ xⁿ dx = xⁿ⁺¹/(n+1)+C',chip:'CALCULUS',
+    fact:'Integration can find areas, volumes, probabilities, and distances!',
+    color:'#A855F7',chipBg:'rgba(168,85,247,0.1)',chipColor:'#C084FC',
+    questions:[
+      {q:'∫ x² dx = ?',opts:['x³/3+C','x³+C','2x+C','3x²+C'],ans:0},
+      {q:'∫₀¹ x dx = ?',opts:['1/2','1','0','2'],ans:0},
+      {q:'∫ cos(x) dx = ?',opts:['sin(x)+C','-sin(x)+C','cos(x)+C','-cos(x)+C'],ans:0},
+    ]
+  },
+];
+
+const TOTAL_Q = WALLS.length;
+
+// ═══════════════════════════════
+//  WORLD SETUP
+// ═══════════════════════════════
+const scene = document.getElementById('scene-objects');
+const W = window.innerWidth;
+const H = window.innerHeight;
+let playerX = 50; // percent
+let score=0,solvedCount=0,streak=0,gameLevel=1;
+let isNight=false,answered=false,currentWallIdx=null,currentQData=null;
+let nearestWallIdx=null;
+let movingL=false,movingR=false;
+
+// ── CLOUDS ──
+const cloudPositions=[
+  {top:'8%',dur:35,delay:-5,puffs:[{w:80,h:40},{w:60,h:50},{w:90,h:40}]},
+  {top:'14%',dur:50,delay:-20,puffs:[{w:70,h:35},{w:100,h:50},{w:70,h:35}]},
+  {top:'6%',dur:42,delay:-32,puffs:[{w:55,h:30},{w:80,h:45},{w:55,h:30}]},
+  {top:'18%',dur:55,delay:-12,puffs:[{w:65,h:38},{w:95,h:48},{w:65,h:35}]},
+];
+cloudPositions.forEach(cp=>{
+  const cl=document.createElement('div');
+  cl.className='cloud';
+  cl.style.cssText=`top:${cp.top};animation-duration:${cp.dur}s;animation-delay:${cp.delay}s;`;
+  cp.puffs.forEach((p,i)=>{
+    const pf=document.createElement('div');
+    pf.className='cloud-puff';
+    pf.style.cssText=`width:${p.w}px;height:${p.h}px;margin-left:${i>0?-20:0}px;margin-top:${i===1?0:10}px;`;
+    cl.appendChild(pf);
+  });
+  document.getElementById('world').appendChild(cl);
+});
+
+// ── STARS ──
+const starsEl=document.getElementById('stars');
+for(let i=0;i<200;i++){
+  const s=document.createElement('div');
+  s.className='star-dot';
+  const sz=.8+Math.random()*2.5;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*85}%;left:${Math.random()*100}%;
+    animation-duration:${.8+Math.random()*2}s;animation-delay:${Math.random()*2}s;`;
+  starsEl.appendChild(s);
+}
+
+// ── AURORA ──
+const auroraEl=document.getElementById('aurora');
+[[0,255,130,8,2.5],[80,0,255,16,3.5],[0,200,255,24,4],[200,0,220,12,3],[0,255,100,20,2.8]].forEach(([r,g,b,top,dur])=>{
+  const b2=document.createElement('div');
+  b2.className='aur-band';
+  b2.style.cssText=`background:rgba(${r},${g},${b},0.28);top:${top}%;height:140px;
+    animation-duration:${dur}s;animation-delay:-${Math.random()*3}s;`;
+  auroraEl.appendChild(b2);
+});
+
+// ── DECORATIVE TREES ──
+const treePositions=[
+  {x:3,size:'small'},{x:8,size:'large'},{x:13,size:'medium'},
+  {x:20,size:'small'},{x:88,size:'large'},{x:82,size:'medium'},
+  {x:76,size:'small'},{x:92,size:'large'},{x:96,size:'medium'},
+  {x:32,size:'small'},{x:68,size:'small'},
+];
+const treeSizes={
+  small:{trunkW:12,trunkH:30,topW:48,topH:55,bottom:96},
+  medium:{trunkW:16,trunkH:38,topW:64,topH:72,bottom:96},
+  large:{trunkW:20,trunkH:46,topW:80,topH:90,bottom:96},
+};
+treePositions.forEach(tp=>{
+  const s=treeSizes[tp.size];
+  const greenShades=['#22C55E','#16A34A','#15803D','#4ADE80','#86EFAC'];
+  const g=greenShades[Math.floor(Math.random()*greenShades.length)];
+  const tree=document.createElement('div');
+  tree.className='tree3d';
+  tree.style.cssText=`left:${tp.x}%;bottom:${s.bottom}px;position:absolute;z-index:8;`;
+  tree.innerHTML=`
+    <div class="tree-foliage" style="width:${s.topW}px;height:${s.topH}px;bottom:${s.trunkH}px;
+      background:linear-gradient(145deg,${g},${g}cc);
+      box-shadow:0 12px 30px rgba(0,0,0,0.15),inset 8px 0 16px rgba(0,0,0,0.1);"></div>
+    <div class="tree-trunk3d" style="width:${s.trunkW}px;height:${s.trunkH}px;
+      box-shadow:3px 0 8px rgba(0,0,0,0.2);"></div>`;
+  scene.appendChild(tree);
+});
+
+// ── LAMP POSTS ──
+[18,36,52,65,80].forEach(x=>{
+  const lp=document.createElement('div');
+  lp.className='lamp-post';
+  lp.style.cssText=`left:${x}%;bottom:115px;z-index:12;`;
+  lp.innerHTML=`<div class="lamp-head"></div><div class="lamp-pole" style="height:55px;"></div>`;
+  scene.appendChild(lp);
+});
+
+// ── MATH WALLS ──
+const wallEls=[];
+const wallCount=WALLS.length;
+const wallStartX=10;
+const wallSpacingX=80/(wallCount-1);
+
+WALLS.forEach((w,i)=>{
+  const wrap=document.createElement('div');
+  wrap.className='wall-wrap';
+  const xPos=wallStartX+i*wallSpacingX;
+  wrap.style.cssText=`left:${xPos}%;bottom:140px;transform:translateX(-50%);`;
+  // Slight depth variation for 3D feel
+  const depthScale=0.82+Math.random()*0.18;
+  const wallEl=document.createElement('div');
+  wallEl.className='math-wall';
+  wallEl.style.cssText=`width:110px;min-height:100px;transform:scale(${depthScale});
+    transform-origin:bottom center;`;
+  wallEl.innerHTML=`
+    <div class="wall-chip" style="background:${w.chipBg};color:${w.chipColor}">${w.chip}</div>
+    <div class="wall-formula" style="color:${w.color}">${w.formula}</div>
+    <div class="wall-title">${w.title}</div>
+    <div class="wall-sub">${w.questions.length} questions</div>
+    <div class="wall-solved-badge">✓</div>`;
+  wallEl.addEventListener('click',()=>openWall(i));
+  wrap.appendChild(wallEl);
+  scene.appendChild(wrap);
+  wallEls.push({wrap,el:wallEl,x:xPos});
+});
+
+// ── PLAYER ──
+const playerEl=document.createElement('div');
+playerEl.id='player-wrap';
+playerEl.style.cssText=`left:${playerX}%;bottom:108px;transform:translateX(-50%);`;
+playerEl.innerHTML=`
+  <div class="player-3d">
+    <div class="p-label">YOU</div>
+    <div class="p-head">😊</div>
+    <div class="p-body"></div>
+    <div class="p-legs"><div class="p-leg"></div><div class="p-leg"></div></div>
+  </div>
+  <div class="player-shadow"></div>`;
+scene.appendChild(playerEl);
+
+// ── NPCs ──
+const npcData=[
+  {x:25,emoji:'🧑‍🏫',color:'#3B82F6',bubble:'Solve π!',delay:'0s'},
+  {x:45,emoji:'👩‍🔬',color:'#EC4899',bubble:'Check RQ3!',delay:'.4s'},
+  {x:62,emoji:'🧑‍💻',color:'#10B981',bubble:'Log rules!',delay:'.8s'},
+  {x:78,emoji:'👨‍🎓',color:'#F59E0B',bubble:'φ = 1.618',delay:'1.2s'},
+];
+npcData.forEach(n=>{
+  const npc=document.createElement('div');
+  npc.className='npc-wrap';
+  npc.style.cssText=`left:${n.x}%;bottom:108px;transform:translateX(-50%);
+    animation-duration:${2.2+Math.random()*.8}s;animation-delay:${n.delay};`;
+  npc.innerHTML=`
+    <div class="npc-bubble">${n.bubble}</div>
+    <div class="npc-body">
+      <div class="npc-head" style="background:linear-gradient(135deg,${n.color}33,${n.color}66);">${n.emoji}</div>
+      <div class="npc-torso" style="background:linear-gradient(180deg,${n.color},${n.color}aa);"></div>
+      <div class="npc-legs"><div class="npc-leg"></div><div class="npc-leg"></div></div>
+    </div>`;
+  scene.appendChild(npc);
+});
+
+// ═══════════════════════════════
+//  GAME LOGIC
+// ═══════════════════════════════
+function openWall(idx){
+  currentWallIdx=idx;
+  const w=WALLS[idx];
+  // Rotate through questions based on solved count
+  const qi=Math.floor(Math.random()*w.questions.length);
+  currentQData={...w.questions[qi],wallIdx:idx};
+  answered=false;
+
+  document.getElementById('mTag').innerHTML=`<span style="color:${w.color};margin-right:6px;">●</span>${w.chip}`;
+  document.getElementById('mTag').style.borderColor=`${w.color}44`;
+  document.getElementById('mFormula').textContent=w.formula;
+  document.getElementById('mTitle').textContent=w.title;
+  document.getElementById('mFact').textContent='💡 '+w.fact;
+  document.getElementById('mQ').textContent=currentQData.q;
+  document.getElementById('mMsg').textContent='';
+  document.getElementById('mMsg').style.color='';
+  document.getElementById('mStreak').textContent=streak>0?`🔥 ${streak} streak`:'';
+
+  const opts=document.getElementById('mOpts');
+  opts.innerHTML='';
+  currentQData.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.textContent=o;
+    btn.onclick=()=>checkAnswer(i,btn);
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('overlay').classList.add('show');
+}
+
+function checkAnswer(i,btn){
+  if(answered) return;
+  answered=true;
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  const msg=document.getElementById('mMsg');
+
+  if(i===currentQData.ans){
+    btn.classList.add('correct');
+    streak++;
+    const pts=10+(streak>2?streak*3:0);
+    score+=pts;
+    solvedCount++;
+    updateHUD();
+    msg.textContent='✓ Correct! Well done!';
+    msg.style.color='var(--correct)';
+    WALLS[currentWallIdx].solved=true;
+    wallEls[currentWallIdx].el.classList.add('solved');
+    checkLevelUp();
+    setTimeout(()=>{closeModal();triggerCelebration(pts);},850);
+  } else {
+    btn.classList.add('wrong');
+    btns[currentQData.ans].classList.add('correct');
+    streak=0;
+    updateHUD();
+    msg.textContent='✗ Not quite — correct answer shown.';
+    msg.style.color='var(--wrong)';
+  }
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function updateHUD(){
+  document.getElementById('hScore').textContent=score;
+  document.getElementById('hSolved').textContent=solvedCount;
+  document.getElementById('hStreak').textContent=streak;
+  const pct=(solvedCount/TOTAL_Q*100).toFixed(0);
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${solvedCount}/${TOTAL_Q}`;
+}
+
+function checkLevelUp(){
+  const newLevel=Math.floor(solvedCount/4)+1;
+  if(newLevel>gameLevel){
+    gameLevel=newLevel;
+    showToast();
+  }
+}
+
+function showToast(){
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ═══════════════════════════════
+//  CELEBRATION
+// ═══════════════════════════════
+let celebTimer=null;
+function triggerCelebration(pts){
+  isNight=true;
+  document.getElementById('sky').className='night';
+  document.getElementById('gsurf').className='ground-surface night';
+  document.getElementById('sun').style.opacity='0';
+  document.querySelectorAll('.cloud').forEach(c=>c.classList.add('night'));
+  document.getElementById('stars').classList.add('show');
+  document.getElementById('aurora').classList.add('show');
+  document.getElementById('aurora-overlay')&&document.getElementById('aurora-overlay').classList.add('show');
+
+  const cel=document.getElementById('celebrate');
+  const celText=document.getElementById('celText');
+  const celSub=document.getElementById('celSub');
+  celText.textContent=streak>=3?`🔥 ${streak}x STREAK!`:'✨ CORRECT!';
+  celSub.textContent=`+${pts} points · ${solvedCount}/${TOTAL_Q} solved`;
+  cel.classList.add('show');
+
+  spawnConfetti();
+  spawnScorePop(pts);
+
+  clearTimeout(celebTimer);
+  celebTimer=setTimeout(()=>{
+    cel.classList.remove('show');
+    returnMorning();
+  },3500);
+}
+
+function returnMorning(){
+  isNight=false;
+  document.getElementById('sky').className='morning';
+  document.getElementById('gsurf').className='ground-surface';
+  document.getElementById('sun').style.opacity='1';
+  document.querySelectorAll('.cloud').forEach(c=>c.classList.remove('night'));
+  document.getElementById('stars').classList.remove('show');
+  document.getElementById('aurora').classList.remove('show');
+}
+
+function spawnConfetti(){
+  const colors=['#6366F1','#8B5CF6','#EC4899','#F59E0B','#10B981','#F43F5E','#60A5FA','#FDE68A'];
+  for(let i=0;i<50;i++){
+    setTimeout(()=>{
+      const c=document.createElement('div');
+      c.className='confetti-piece';
+      const sz=6+Math.random()*8;
+      c.style.cssText=`width:${sz}px;height:${sz}px;
+        left:${10+Math.random()*80}%;top:${5+Math.random()*25}%;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        border-radius:${Math.random()>0.5?'50%':'3px'};
+        animation-duration:${1+Math.random()*.8}s;
+        animation-delay:${Math.random()*.4}s;`;
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),2000);
+    },i*40);
+  }
+}
+
+function spawnScorePop(pts){
+  const el=document.createElement('div');
+  el.className='score-float';
+  el.textContent='+'+pts;
+  el.style.cssText=`left:${playerX}%;top:${55+Math.random()*10}%;`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1800);
+}
+
+// ═══════════════════════════════
+//  MOVEMENT (keyboard + proximity)
+// ═══════════════════════════════
+const keys={};
+document.addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  if(e.code==='Escape') closeModal();
+});
+document.addEventListener('keyup',e=>{ keys[e.code]=false; });
+
+function detectNearestWall(){
+  let nearest=null, nearDist=99;
+  wallEls.forEach((w,i)=>{
+    const dist=Math.abs(w.x-playerX);
+    if(dist<nearDist){nearDist=dist;nearest=i;}
+  });
+  nearestWallIdx=nearest;
+  const prox=document.getElementById('prox');
+  if(nearDist<8){
+    prox.style.display='block';
+    wallEls[nearest].wrap.classList.add('wall-pulse');
+  } else {
+    prox.style.display='none';
+    if(nearest!==null) wallEls[nearest].wrap.classList.remove('wall-pulse');
+  }
+  // Remove pulse from others
+  wallEls.forEach((w,i)=>{if(i!==nearest)w.wrap.classList.remove('wall-pulse');});
+}
+
+function gameLoop(){
+  const spd=0.14*(keys['ShiftLeft']?1.8:1);
+  if(keys['ArrowLeft']||keys['KeyA']) playerX=Math.max(3,playerX-spd);
+  if(keys['ArrowRight']||keys['KeyD']) playerX=Math.min(97,playerX+spd);
+
+  if(keys['Space']&&!document.getElementById('overlay').classList.contains('show')){
+    if(nearestWallIdx!==null&&Math.abs(wallEls[nearestWallIdx].x-playerX)<8) openWall(nearestWallIdx);
+  }
+
+  playerEl.style.left=playerX+'%';
+  // Walking leg animation speed
+  const isMoving=keys['ArrowLeft']||keys['KeyA']||keys['ArrowRight']||keys['KeyD'];
+  const legs=playerEl.querySelectorAll('.p-leg');
+  legs.forEach(l=>{l.style.animationPlayState=isMoving?'running':'paused';});
+  // Face direction
+  const ph=playerEl.querySelector('.p-head');
+  if(keys['ArrowLeft']||keys['KeyA']) ph.style.transform='scaleX(-1)';
+  else if(keys['ArrowRight']||keys['KeyD']) ph.style.transform='scaleX(1)';
+
+  detectNearestWall();
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
+
+// ── CLICK on wall when player nearby ──
+document.addEventListener('keydown',e=>{
+  if(e.code==='KeyE'&&nearestWallIdx!==null&&Math.abs(wallEls[nearestWallIdx].x-playerX)<10){
+    if(!document.getElementById('overlay').classList.contains('show')) openWall(nearestWallIdx);
+  }
+});
+
+// Hint fade
+setTimeout(()=>{
+  const h=document.getElementById('hint-bar');
+  h.style.transition='opacity 1s';h.style.opacity='0';
+},7000);
+
+// NPC bubble rotation
+const npcBubbles=[
+  ['Solve π!','Try F=ma!','What is φ?','∫x dx?'],
+  ['Check RQ3!','Bayes rule!','det A=?','Try σ!'],
+  ['Log rules!','eⁱᵖ+1=0!','x²+y²=?','Try CLT!'],
+  ['φ = 1.618','a²+b²=c²','Try primes','xⁿ rule!'],
+];
+document.querySelectorAll('.npc-bubble').forEach((b,i)=>{
+  setInterval(()=>{
+    const arr=npcBubbles[i%npcBubbles.length];
+    b.textContent=arr[Math.floor(Math.random()*arr.length)];
+  },3000+i*500);
+});
+</script>
+</body>
+</html>
