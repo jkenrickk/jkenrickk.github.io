@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Epigenomic Dysregulation and Transcriptomic Reprogramming in Invasive Ductal Carcinoma</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+/* ─────────────────────────────────────────────
+   DESIGN TOKENS
+   ───────────────────────────────────────────── */
+:root {
+  --ink:        #0D1B2A;
+  --ink-soft:   #1E3448;
+  --slate:      #2C4A6E;
+  --ocean:      #1A6B8A;
+  --teal:       #0EB5A0;
+  --coral:      #E05C5C;
+  --amber:      #F0A500;
+  --ghost:      #F0F4F8;
+  --mist:       #E2EAF2;
+  --white:      #FFFFFF;
+  --text:       #1A2E42;
+  --text-soft:  #4A6580;
+  --text-muted: #8AA4BE;
+  --border:     rgba(44,74,110,0.15);
+
+  --serif:      'Playfair Display', Georgia, serif;
+  --sans:       'IBM Plex Sans', system-ui, sans-serif;
+  --mono:       'IBM Plex Mono', monospace;
+
+  --r-sm:  6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--ghost);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─────────────────────────────────────────────
+   NAVIGATION
+   ───────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(13,27,42,0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(14,181,160,0.2);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--teal);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.8rem;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--teal); }
+
+/* ─────────────────────────────────────────────
+   HERO
+   ───────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 50%, #0E2940 100%);
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  align-items: center;
+  gap: 4rem;
+  padding: 8rem 5rem 5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px; right: -200px;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(14,181,160,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(14,181,160,0.12);
+  border: 1px solid rgba(14,181,160,0.3);
+  color: var(--teal);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 1.8rem;
+}
+
+.hero-badge::before {
+  content: '';
+  width: 7px; height: 7px;
+  background: var(--teal);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.4rem;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--teal);
+}
+
+.hero-meta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1.8rem;
+  line-height: 1.9;
+}
+
+.hero-meta strong { color: rgba(255,255,255,0.7); font-weight: 500; }
+
+.hero-byline {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.04em;
+  margin-bottom: 2rem;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.stat-item { text-align: center; }
+
+.stat-number {
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--teal);
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* DNA helix SVG panel */
+.hero-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.dna-container {
+  width: 280px;
+  height: 380px;
+  position: relative;
+}
+
+.cell-image-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 280px;
+}
+
+.cell-image-strip img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--r-sm);
+  opacity: 0.85;
+  filter: saturate(0.8) contrast(1.1);
+  transition: opacity 0.3s;
+}
+
+.cell-image-strip img:hover { opacity: 1; }
+
+.img-label {
+  position: absolute;
+  bottom: 6px; left: 6px;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: white;
+  background: rgba(0,0,0,0.55);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.img-wrap { position: relative; }
+
+/* ─────────────────────────────────────────────
+   SECTIONS SHARED
+   ───────────────────────────────────────────── */
+.section {
+  padding: 5rem 5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ocean);
+  margin-bottom: 0.6rem;
+}
+
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.section-lead {
+  font-size: 1.05rem;
+  color: var(--text-soft);
+  max-width: 780px;
+  margin-bottom: 3rem;
+  line-height: 1.8;
+}
+
+/* ─────────────────────────────────────────────
+   ABSTRACT BAND
+   ───────────────────────────────────────────── */
+.abstract-band {
+  background: var(--ink);
+  color: var(--white);
+  padding: 4rem 5rem;
+}
+
+.abstract-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.abstract-sidebar {
+  padding-top: 0.3rem;
+}
+
+.abstract-sidebar .section-label { color: var(--teal); }
+
+.abstract-kw {
+  margin-top: 2rem;
+}
+
+.abstract-kw p {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.7rem;
+}
+
+.kw-pill {
+  display: inline-block;
+  background: rgba(14,181,160,0.15);
+  border: 1px solid rgba(14,181,160,0.25);
+  color: var(--teal);
+  font-size: 0.72rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  margin: 0.2rem;
+}
+
+.abstract-text {
+  font-size: 0.97rem;
+  line-height: 2;
+  color: rgba(255,255,255,0.78);
+  border-left: 3px solid var(--teal);
+  padding-left: 2rem;
+}
+
+.abstract-text strong { color: var(--white); font-weight: 600; }
+
+/* ─────────────────────────────────────────────
+   COHORT SECTION
+   ───────────────────────────────────────────── */
+.cohort-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+  margin-bottom: 3rem;
+}
+
+.cohort-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 1.6rem 1.4rem;
+  text-align: center;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.cohort-card:hover {
+  box-shadow: 0 8px 32px rgba(44,74,110,0.12);
+  transform: translateY(-2px);
+}
+
+.cohort-card .big-num {
+  font-family: var(--serif);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--ocean);
+  display: block;
+  line-height: 1;
+  margin-bottom: 0.4rem;
+}
+
+.cohort-card .card-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cohort-card .card-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+}
+
+/* ─────────────────────────────────────────────
+   CHART CARDS
+   ───────────────────────────────────────────── */
+.chart-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+.chart-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+.chart-grid-wide {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+.chart-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1.8rem;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+
+.chart-card:hover {
+  box-shadow: 0 6px 28px rgba(44,74,110,0.1);
+}
+
+.chart-card-header {
+  margin-bottom: 1.2rem;
+}
+
+.chart-title {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+}
+
+.chart-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 280px;
+}
+
+.chart-wrap-tall {
+  position: relative;
+  height: 360px;
+}
+
+.chart-wrap-sm {
+  position: relative;
+  height: 220px;
+}
+
+.chart-annotation {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--ghost);
+  border-radius: var(--r-sm);
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  line-height: 1.6;
+  border-left: 3px solid var(--ocean);
+}
+
+/* ─────────────────────────────────────────────
+   SECTION DIVIDER
+   ───────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0 5rem;
+}
+
+/* ─────────────────────────────────────────────
+   HEATMAP CANVAS (custom drawn)
+   ───────────────────────────────────────────── */
+#heatmapCanvas {
+  width: 100%;
+  height: 340px;
+  display: block;
+}
+
+/* ─────────────────────────────────────────────
+   PATHWAY TABLE
+   ───────────────────────────────────────────── */
+.pathway-table-wrap {
+  overflow-x: auto;
+}
+
+table.pathway-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.pathway-table thead tr {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.pathway-table th {
+  padding: 0.9rem 1rem;
+  text-align: left;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.pathway-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.pathway-table tbody tr:hover { background: var(--mist); }
+
+.pathway-table td {
+  padding: 0.8rem 1rem;
+  color: var(--text);
+}
+
+.pathway-table td:first-child { font-weight: 500; color: var(--ocean); }
+
+.bar-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.bar-bg {
+  flex: 1;
+  height: 6px;
+  background: var(--mist);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--ocean), var(--teal));
+}
+
+.badge-sig {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.badge-sig.up   { background: rgba(224,92,92,0.12); color: var(--coral); }
+.badge-sig.down { background: rgba(26,107,138,0.12); color: var(--ocean); }
+.badge-sig.ns   { background: var(--mist); color: var(--text-muted); }
+
+/* ─────────────────────────────────────────────
+   SURVIVAL SECTION
+   ───────────────────────────────────────────── */
+.survival-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.survival-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+}
+
+.legend-swatch {
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.hazard-card {
+  background: var(--ink);
+  border-radius: var(--r-md);
+  padding: 1.6rem;
+  color: white;
+}
+
+.hazard-card h4 {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--teal);
+  margin-bottom: 1.2rem;
+}
+
+.hr-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  font-size: 0.8rem;
+}
+
+.hr-row:last-child { border-bottom: none; }
+.hr-name { color: rgba(255,255,255,0.7); }
+.hr-value { font-family: var(--mono); color: var(--teal); font-weight: 500; }
+
+/* ─────────────────────────────────────────────
+   BIOLOGY IMAGE SECTION
+   ───────────────────────────────────────────── */
+.biology-strip {
+  background: var(--ink-soft);
+  padding: 4rem 5rem;
+}
+
+.bio-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.bio-inner .section-label { color: var(--teal); }
+.bio-inner .section-title { color: var(--white); }
+.bio-inner .section-lead  { color: rgba(255,255,255,0.6); }
+
+.bio-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.bio-card {
+  border-radius: var(--r-md);
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+
+.bio-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.7) contrast(1.1);
+  transition: filter 0.4s, transform 0.4s;
+}
+
+.bio-card:hover img {
+  filter: saturate(1.1) contrast(1.05);
+  transform: scale(1.04);
+}
+
+.bio-card-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(0deg, rgba(13,27,42,0.9) 0%, transparent 100%);
+  padding: 1.5rem 1rem 0.9rem;
+}
+
+.bio-card-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--white);
+  font-family: var(--sans);
+}
+
+.bio-card-sub {
+  font-size: 0.7rem;
+  color: var(--teal);
+  font-family: var(--mono);
+  margin-top: 0.2rem;
+}
+
+/* ─────────────────────────────────────────────
+   METHODS ACCORDION
+   ───────────────────────────────────────────── */
+.accordion { margin-bottom: 0.6rem; }
+
+.acc-trigger {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 1rem 1.2rem;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.acc-trigger:hover { background: var(--mist); }
+
+.acc-arrow {
+  font-size: 0.7rem;
+  transition: transform 0.3s;
+  color: var(--ocean);
+}
+
+.acc-body {
+  display: none;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  padding: 1.2rem 1.4rem;
+  font-size: 0.85rem;
+  line-height: 1.8;
+  color: var(--text-soft);
+}
+
+.acc-body.open { display: block; }
+.acc-trigger.open .acc-arrow { transform: rotate(180deg); }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  background: var(--mist);
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+  color: var(--ocean);
+}
+
+/* ─────────────────────────────────────────────
+   INTERACTIVE CONTROLS
+   ───────────────────────────────────────────── */
+.ctrl-row {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+
+.ctrl-btn {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ctrl-btn:hover, .ctrl-btn.active {
+  background: var(--ocean);
+  color: var(--white);
+  border-color: var(--ocean);
+}
+
+/* ─────────────────────────────────────────────
+   FOOTER
+   ───────────────────────────────────────────── */
+footer {
+  background: var(--ink);
+  color: rgba(255,255,255,0.45);
+  padding: 3rem 5rem;
+  font-size: 0.78rem;
+  line-height: 1.8;
+}
+
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 3rem;
+}
+
+.footer-logo {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 0.5rem;
+}
+
+footer a { color: var(--teal); text-decoration: none; }
+
+/* ─────────────────────────────────────────────
+   SCROLL REVEAL
+   ───────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .hero { grid-template-columns: 1fr; padding: 7rem 2rem 3rem; }
+  .hero-visual { display: none; }
+  .section { padding: 3.5rem 2rem; }
+  .abstract-inner { grid-template-columns: 1fr; }
+  .cohort-grid { grid-template-columns: repeat(2, 1fr); }
+  .chart-grid-2, .chart-grid-3, .chart-grid-wide { grid-template-columns: 1fr; }
+  .survival-layout { grid-template-columns: 1fr; }
+  .bio-grid { grid-template-columns: repeat(2, 1fr); }
+  .divider { margin: 0 2rem; }
+  .biology-strip { padding: 3rem 2rem; }
+  footer { padding: 2rem; }
+  .footer-inner { flex-direction: column; gap: 1.5rem; }
+  nav { padding: 0 1rem; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <span class="nav-brand">IDC Multi-Omics · 2025</span>
+  <ul class="nav-links">
+    <li><a href="#abstract">Abstract</a></li>
+    <li><a href="#cohort">Cohort</a></li>
+    <li><a href="#transcriptomics">Transcriptomics</a></li>
+    <li><a href="#methylation">Methylation</a></li>
+    <li><a href="#survival">Survival</a></li>
+    <li><a href="#pathways">Pathways</a></li>
+    <li><a href="#methods">Methods</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Pathology · Molecular Oncology · Open Access</div>
+    <h1>
+      Epigenomic Dysregulation and Transcriptomic Reprogramming in
+      <em>Invasive Ductal Carcinoma</em>: A Multi-Omics Analysis of
+      Tumour Heterogeneity, Immune Evasion, and Survival Stratification
+    </h1>
+
+    <div class="hero-byline">Jonassen Kenrick &nbsp;·&nbsp; 2025</div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-number">412</span>
+        <span class="stat-label">Samples</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">18,240</span>
+        <span class="stat-label">Genes Profiled</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">3,817</span>
+        <span class="stat-label">CpG Sites</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">11</span>
+        <span class="stat-label">Publications</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual panel -->
+  <div class="hero-visual">
+    <!-- Animated DNA helix — signature element -->
+    <div class="dna-container">
+      <svg id="dnaHelix" viewBox="0 0 280 380" xmlns="http://www.w3.org/2000/svg" width="280" height="380"></svg>
+    </div>
+    <div class="cell-image-strip">
+      <div class="img-wrap">
+        <img src="https://images.unsplash.com/photo-1576086213369-97a306d36557?w=300&q=80" alt="Cell microscopy"/>
+        <span class="img-label">H&amp;E · ×40</span>
+      </div>
+      <div class="img-wrap">
+        <img src="https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=300&q=80" alt="Tissue section"/>
+        <span class="img-label">IHC · Ki67</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABSTRACT -->
+<section class="abstract-band" id="abstract">
+  <div class="abstract-inner">
+    <div class="abstract-sidebar">
+      <div class="section-label">Abstract</div>
+      <div class="abstract-kw">
+        <p>Keywords</p>
+        <span class="kw-pill">Invasive Ductal Carcinoma</span>
+        <span class="kw-pill">RNA-seq</span>
+        <span class="kw-pill">DNA Methylation</span>
+        <span class="kw-pill">Tumour Heterogeneity</span>
+        <span class="kw-pill">GSEA</span>
+        <span class="kw-pill">Kaplan-Meier</span>
+        <span class="kw-pill">NMF</span>
+        <span class="kw-pill">Multi-Omics</span>
+      </div>
+    </div>
+    <div>
+      <p class="abstract-text">
+        <strong>Background.</strong> Invasive ductal carcinoma (IDC) accounts for approximately 80% of all breast cancer diagnoses and exhibits marked transcriptomic and epigenomic heterogeneity that confounds prognostication and therapeutic stratification. Elucidating the molecular architecture of IDC subtypes is a prerequisite for precision oncology.
+        <br/><br/>
+        <strong>Methods.</strong> We performed integrative multi-omics profiling of 412 IDC specimens and 88 matched adjacent-normal controls using RNA-seq (18,240 genes), Illumina EPIC methylation arrays (3,817 CpG sites), and low-pass whole-genome sequencing for copy-number inference. Differential expression was computed via DESeq2 with BH-corrected FDR &lt; 0.05. Non-negative matrix factorisation (NMF) was applied for consensus molecular subtyping. Survival analysis employed Cox proportional-hazards regression.
+        <br/><br/>
+        <strong>Results.</strong> We identified <strong>2,134 differentially expressed genes</strong> (1,089 upregulated; 1,045 downregulated) and three reproducible molecular subtypes (IDC-S1, IDC-S2, IDC-S3) with distinct epigenomic and transcriptomic signatures. IDC-S3 exhibited focal amplification of chromosome 17q12 encompassing <em>ERBB2</em>, pervasive promoter hypermethylation of DNA-damage repair loci, and significantly inferior overall survival (HR = 2.41; 95% CI 1.78–3.26; p &lt; 0.001). Immune evasion pathway enrichment was highest in IDC-S1.
+        <br/><br/>
+        <strong>Conclusions.</strong> Multi-omics subtyping of IDC reveals clinically actionable transcriptomic and epigenomic distinctions. IDC-S3 represents a high-risk subgroup warranting prospective evaluation of targeted ERBB2 inhibition combined with epigenetic reprogramming strategies.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- COHORT -->
+<div class="divider"></div>
+<section class="section reveal" id="cohort">
+  <div class="section-label">Section 1</div>
+  <h2 class="section-title">Patient Cohort and Sample Characteristics</h2>
+  <p class="section-lead">Samples were collected between 2018–2024 across three participating centres. All tumour-normal pairs were subjected to centralised pathological review confirming IDC diagnosis prior to molecular profiling.</p>
+
+  <div class="cohort-grid">
+    <div class="cohort-card">
+      <span class="big-num">412</span>
+      <div class="card-label">IDC Tumour Samples</div>
+      <div class="card-sub">Stages I–IV</div>
+    </div>
+    <div class="cohort-card">
+      <span class="big-num">88</span>
+      <div class="card-label">Adjacent Normal</div>
+      <div class="card-sub">Matched controls</div>
+    </div>
+    <div class="cohort-card">
+      <span class="big-num">58.4</span>
+      <div class="card-label">Median Age (years)</div>
+      <div class="card-sub">Range 29–84</div>
+    </div>
+    <div class="cohort-card">
+      <span class="big-num">67%</span>
+      <div class="card-label">ER-positive Tumours</div>
+      <div class="card-sub">IHC confirmed</div>
+    </div>
+  </div>
+
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Stage Distribution</div>
+        <div class="chart-subtitle">Proportion of samples per AJCC pathological stage</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="stageChart"></canvas>
+      </div>
+      <div class="chart-annotation">Stage II tumours represent the largest stratum (38%), consistent with population-level IDC epidemiology and the recruitment strategy favouring resectable primary tumours.</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Receptor Status Distribution</div>
+        <div class="chart-subtitle">ER, PR, HER2 and triple-negative subtype breakdown</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="receptorChart"></canvas>
+      </div>
+      <div class="chart-annotation">HER2-enriched and triple-negative subtypes are enriched in stage III–IV samples, consistent with their known association with higher-grade, more aggressive disease.</div>
+    </div>
+  </div>
+
+  <div class="chart-grid-wide">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Age at Diagnosis by Molecular Subtype</div>
+        <div class="chart-subtitle">Violin + box plot overlay showing age distribution across IDC-S1, IDC-S2, IDC-S3</div>
+      </div>
+      <div class="chart-wrap-tall">
+        <canvas id="ageViolinChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Tumour Grade</div>
+        <div class="chart-subtitle">Nottingham histological grade by subtype</div>
+      </div>
+      <div class="chart-wrap-tall">
+        <canvas id="gradeChart"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRANSCRIPTOMICS -->
+<div class="divider"></div>
+<section class="section reveal" id="transcriptomics">
+  <div class="section-label">Section 2 — Transcriptomics</div>
+  <h2 class="section-title">Differential Expression Analysis</h2>
+  <p class="section-lead">RNA-seq count matrices were normalised using DESeq2 median-of-ratios. Differential expression testing compared IDC (n=412) against adjacent normal (n=88) using a Wald test with Benjamini–Hochberg FDR correction at q &lt; 0.05 and |log₂FC| ≥ 1.5.</p>
+
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Volcano Plot — IDC vs Adjacent Normal</div>
+        <div class="chart-subtitle">Each point is a gene. Red = upregulated in IDC, Blue = downregulated.</div>
+      </div>
+      <div class="chart-wrap-tall">
+        <canvas id="volcanoChart"></canvas>
+      </div>
+      <div class="chart-annotation"><strong>2,134 significant DE genes</strong> identified at FDR &lt; 0.05 and |log₂FC| ≥ 1.5. Top upregulated genes include <em>MKI67</em>, <em>TOP2A</em>, <em>ERBB2</em>, and <em>CCND1</em>.</div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">MA Plot</div>
+        <div class="chart-subtitle">Mean expression (A) versus fold change (M). Colour encodes significance.</div>
+      </div>
+      <div class="chart-wrap-tall">
+        <canvas id="maChart"></canvas>
+      </div>
+      <div class="chart-annotation">Lowly expressed genes show higher fold-change variance, as expected from count-based noise. Significant genes cluster symmetrically around the horizontal axis at higher A values.</div>
+    </div>
+  </div>
+
+  <div class="chart-grid-3">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Top 15 Upregulated Genes</div>
+        <div class="chart-subtitle">Ranked by log₂FC in IDC vs normal</div>
+      </div>
+      <div class="chart-wrap-tall">
+        <canvas id="topUpChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Top 15 Downregulated Genes</div>
+        <div class="chart-subtitle">Ranked by magnitude of log₂FC</div>
+      </div>
+      <div class="chart-wrap-tall">
+        <canvas id="topDownChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">DE Genes by Chromosome</div>
+        <div class="chart-subtitle">Chromosomal distribution of significant DE genes</div>
+      </div>
+      <div class="chart-wrap-tall">
+        <canvas id="chromChart"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METHYLATION -->
+<div class="divider"></div>
+<section class="section reveal" id="methylation">
+  <div class="section-label">Section 3 — Epigenomics</div>
+  <h2 class="section-title">DNA Methylation Landscape in IDC</h2>
+  <p class="section-lead">Differentially methylated CpG sites (DMS) were identified using M-value linear modelling with limma. Promoter-associated CpGs were defined as ±1.5 kb from transcription start site using GENCODE v43 annotation.</p>
+
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Global Beta Value Distribution</div>
+        <div class="chart-subtitle">Comparison of tumour vs adjacent normal CpG methylation levels</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="methylDist"></canvas>
+      </div>
+      <div class="chart-annotation">Bimodal beta distribution characteristic of CpG methylation. IDC tumours show a shift toward intermediate methylation values, indicative of global epigenomic disruption and CpG island shore hypomethylation.</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Methylation Change vs Expression Change</div>
+        <div class="chart-subtitle">Scatter — promoter DMS (x-axis: delta beta, y-axis: log₂FC)</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="methExprScatter"></canvas>
+      </div>
+      <div class="chart-annotation">Canonical inverse relationship confirmed: promoter hypermethylation (Δβ &gt; +0.2) is associated with gene silencing (log₂FC &lt; −1), particularly in DNA-damage repair genes.</div>
+    </div>
+  </div>
+
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Differentially Methylated CpGs by Genomic Context</div>
+        <div class="chart-subtitle">Proportion of hyper/hypomethylated DMS across genomic features</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="dmsContext"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Methylation Heatmap — Top 40 DMS</div>
+        <div class="chart-subtitle">Z-scored beta values across tumour subtypes (simulated)</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="heatmapCanvas"></canvas>
+      </div>
+      <div class="chart-annotation">IDC-S3 samples cluster with widespread promoter hypermethylation of BRCA1, MLH1, and CDKN2A — a pattern consistent with a CpG island methylator phenotype (CIMP-high) subgroup.</div>
+    </div>
+  </div>
+</section>
+
+<!-- BIOLOGY STRIP -->
+<section class="biology-strip" id="biology">
+  <div class="bio-inner">
+    <div class="section-label">Pathological Context</div>
+    <h2 class="section-title">Tumour Microenvironment and Tissue Morphology</h2>
+    <p class="section-lead">Representative histological and immunofluorescence images illustrating the stromal remodelling, immune infiltration, and nuclear atypia characteristic of the three molecular subtypes identified in this cohort.</p>
+    <div class="bio-grid">
+      <div class="bio-card">
+        <img src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&q=80" alt="Cancer cells microscopy"/>
+        <div class="bio-card-overlay">
+          <div class="bio-card-title">Tumour Nests — IDC-S3</div>
+          <div class="bio-card-sub">H&amp;E · ×20 · Grade III</div>
+        </div>
+      </div>
+      <div class="bio-card">
+        <img src="https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400&q=80" alt="Cell culture"/>
+        <div class="bio-card-overlay">
+          <div class="bio-card-title">NK Cell Infiltration</div>
+          <div class="bio-card-sub">Flow cytometry · CD56+</div>
+        </div>
+      </div>
+      <div class="bio-card">
+        <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&q=80" alt="Brain tissue slice"/>
+        <div class="bio-card-overlay">
+          <div class="bio-card-title">Stromal Remodelling</div>
+          <div class="bio-card-sub">Masson Trichrome · ×10</div>
+        </div>
+      </div>
+      <div class="bio-card">
+        <img src="https://images.unsplash.com/photo-1582719188393-bb71ca45dbb9?w=400&q=80" alt="Research laboratory"/>
+        <div class="bio-card-overlay">
+          <div class="bio-card-title">ERBB2 IHC — IDC-S3</div>
+          <div class="bio-card-sub">IHC 3+ · Herceptest</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SURVIVAL -->
+<div class="divider"></div>
+<section class="section reveal" id="survival">
+  <div class="section-label">Section 4 — Clinical Outcomes</div>
+  <h2 class="section-title">Survival Analysis by Molecular Subtype</h2>
+  <p class="section-lead">Overall survival (OS) and disease-free survival (DFS) were analysed using Kaplan–Meier estimators with log-rank tests for group comparisons. Cox proportional-hazards regression was used to estimate hazard ratios after adjustment for age, stage, and receptor status.</p>
+
+  <div class="survival-layout">
+    <div>
+      <div class="ctrl-row">
+        <button class="ctrl-btn active" onclick="switchSurvival('os', this)">Overall Survival</button>
+        <button class="ctrl-btn" onclick="switchSurvival('dfs', this)">Disease-free Survival</button>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-title" id="survTitle">Kaplan–Meier Overall Survival Curves</div>
+          <div class="chart-subtitle">Log-rank p &lt; 0.001 across three molecular subtypes</div>
+        </div>
+        <div class="chart-wrap-tall">
+          <canvas id="survivalChart"></canvas>
+        </div>
+        <div class="chart-annotation" id="survAnnotation">IDC-S3 demonstrates significantly inferior overall survival (median OS = 28 months) compared to IDC-S1 (median OS = 74 months) and IDC-S2 (median OS = 55 months). Divergence occurs early and persists throughout follow-up.</div>
+      </div>
+      <div class="survival-legend">
+        <div class="legend-row"><div class="legend-swatch" style="background:#8E44AD;"></div>IDC-S1 — Immune-active (n=148)</div>
+        <div class="legend-row"><div class="legend-swatch" style="background:#27AE60;"></div>IDC-S2 — Intermediate (n=152)</div>
+        <div class="legend-row"><div class="legend-swatch" style="background:#E05C5C;"></div>IDC-S3 — ERBB2/CIMP-high (n=112)</div>
+      </div>
+    </div>
+    <div>
+      <div class="hazard-card">
+        <h4>Cox Regression — Hazard Ratios</h4>
+        <div class="hr-row">
+          <span class="hr-name">IDC-S3 vs IDC-S1</span>
+          <span class="hr-value">HR 2.41</span>
+        </div>
+        <div class="hr-row">
+          <span class="hr-name">95% CI</span>
+          <span class="hr-value">1.78–3.26</span>
+        </div>
+        <div class="hr-row">
+          <span class="hr-name">p-value</span>
+          <span class="hr-value">&lt; 0.001</span>
+        </div>
+        <div class="hr-row" style="margin-top:1rem;border-top:1px solid rgba(255,255,255,0.1);padding-top:1rem">
+          <span class="hr-name">IDC-S2 vs IDC-S1</span>
+          <span class="hr-value">HR 1.47</span>
+        </div>
+        <div class="hr-row">
+          <span class="hr-name">95% CI</span>
+          <span class="hr-value">1.11–1.94</span>
+        </div>
+        <div class="hr-row">
+          <span class="hr-name">p-value</span>
+          <span class="hr-value">0.007</span>
+        </div>
+        <div class="hr-row" style="margin-top:1rem;border-top:1px solid rgba(255,255,255,0.1);padding-top:1rem">
+          <span class="hr-name">Stage III–IV</span>
+          <span class="hr-value">HR 1.92</span>
+        </div>
+        <div class="hr-row">
+          <span class="hr-name">Age ≥ 65</span>
+          <span class="hr-value">HR 1.28</span>
+        </div>
+        <div class="hr-row">
+          <span class="hr-name">Triple-negative</span>
+          <span class="hr-value">HR 1.73</span>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-top:1.2rem;">
+        <div class="chart-card-header">
+          <div class="chart-title">Subtype Sample Sizes</div>
+          <div class="chart-subtitle">With 5-year OS rate</div>
+        </div>
+        <div class="chart-wrap-sm">
+          <canvas id="subtypeBar"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PATHWAYS -->
+<div class="divider"></div>
+<section class="section reveal" id="pathways">
+  <div class="section-label">Section 5 — Pathway Analysis</div>
+  <h2 class="section-title">Gene Set Enrichment and Pathway Dysregulation</h2>
+  <p class="section-lead">GSEA was performed against MSigDB Hallmark gene sets (n=50) and KEGG pathways (n=186). Enrichment scores were computed using the weighted Kolmogorov–Smirnov statistic. NES ≥ 1.5 or ≤ −1.5 at FDR &lt; 0.25 were considered significant.</p>
+
+  <div class="chart-grid-2" style="margin-bottom:2rem;">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">GSEA Enrichment Plot — E2F Targets</div>
+        <div class="chart-subtitle">NES = 2.31 · FDR = 0.002 · Cell cycle progression</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="gseaChart1"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">GSEA Enrichment Plot — IFN-γ Response</div>
+        <div class="chart-subtitle">NES = 1.87 · FDR = 0.018 · Immune activation (IDC-S1)</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="gseaChart2"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid-2" style="margin-bottom:2rem;">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Top Enriched Hallmark Pathways by Subtype</div>
+        <div class="chart-subtitle">NES heatmap — IDC-S1, IDC-S2, IDC-S3 vs normal</div>
+      </div>
+      <div class="chart-wrap-tall">
+        <canvas id="nesHeatmap"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">Mutation Signature Contributions</div>
+        <div class="chart-subtitle">NMF-derived COSMIC-like signatures per tumour subtype</div>
+      </div>
+      <div class="chart-wrap-tall">
+        <canvas id="sigChart"></canvas>
+      </div>
+      <div class="chart-annotation">SBS3 (homologous recombination deficiency) dominates IDC-S3, consistent with BRCA1 promoter hypermethylation and ERBB2 amplification co-occurrence. SBS5 (clock-like) contributes uniformly across subtypes.</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <div class="chart-title">Significant Hallmark Pathways — Ranked by |NES|</div>
+      <div class="chart-subtitle">Top 15 pathways enriched or depleted in IDC vs adjacent normal (GSEA, FDR &lt; 0.25)</div>
+    </div>
+    <div class="pathway-table-wrap">
+      <table class="pathway-table">
+        <thead>
+          <tr>
+            <th>Pathway</th>
+            <th>NES</th>
+            <th>FDR q-value</th>
+            <th>Direction</th>
+            <th>Enrichment</th>
+          </tr>
+        </thead>
+        <tbody id="pathwayTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- METHODS -->
+<div class="divider"></div>
+<section class="section reveal" id="methods">
+  <div class="section-label">Section 6 — Methods</div>
+  <h2 class="section-title">Materials and Methods</h2>
+  <p class="section-lead">A complete description of data acquisition, pre-processing pipelines, statistical frameworks, and software versions used throughout this analysis.</p>
+
+  <div class="accordion">
+    <button class="acc-trigger" onclick="toggleAcc(this)">
+      RNA-seq Library Preparation and Alignment
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      Total RNA was extracted from fresh-frozen tissue using TRIzol reagent (Thermo Fisher). Libraries were prepared using the Illumina TruSeq Stranded Total RNA kit with Ribo-Zero Gold depletion. Paired-end 150 bp sequencing was performed on the NovaSeq 6000 to a target depth of 50M reads per sample. Reads were aligned to GRCh38 (GENCODE v43) using <code>STAR v2.7.10a</code> with default parameters. Gene-level counts were quantified with <code>featureCounts</code> (Subread v2.0.3). Quality metrics were assessed with <code>FastQC</code> and <code>MultiQC</code>.
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-trigger" onclick="toggleAcc(this)">
+      Differential Expression — DESeq2 Pipeline
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      Count matrices were imported into <code>R v4.3.1</code> using <code>DESeq2 v1.40.2</code>. Low-count genes (fewer than 10 reads across 80% of samples) were removed prior to analysis. The design formula <code>~ batch + group</code> was used, with batch as a known technical covariate estimated from RNA-seq principal components. Wald tests were used to compute log₂ fold changes and associated standard errors. Multiple testing correction applied the Benjamini–Hochberg procedure at FDR &lt; 0.05. Results were exported and annotated against Ensembl release 110.
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-trigger" onclick="toggleAcc(this)">
+      DNA Methylation Array Processing
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      EPIC 850K arrays were processed using <code>minfi v1.46.0</code> in R. Functional normalisation was applied via <code>preprocessFunnorm</code>. Probes with detection p &gt; 0.01, cross-reactive probes, probes overlapping SNPs (MAF ≥ 0.01, dbSNP v151), and sex-chromosome probes were removed. Beta values were converted to M-values for linear modelling. Differentially methylated positions (DMPs) were identified using <code>limma v3.56</code> with BH correction at FDR &lt; 0.05 and |Δβ| ≥ 0.15.
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-trigger" onclick="toggleAcc(this)">
+      NMF Molecular Subtyping
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      Consensus non-negative matrix factorisation (cNMF) was applied to the top 5,000 most variable genes (by MAD) across the 412 IDC samples using <code>NMF v0.26</code> in R. Factorisation rank was selected by cophenetic correlation coefficient stability across 200 bootstrap iterations. The optimal rank k=3 was confirmed by both stability and silhouette score maximisation. Cluster assignments were validated using an independent TCGA BRCA subset (n=186).
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-trigger" onclick="toggleAcc(this)">
+      Survival Analysis and Cox Regression
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      Overall survival (OS) was defined as time from diagnosis to death from any cause or censoring at last follow-up. Disease-free survival (DFS) was defined as time to locoregional recurrence, distant metastasis, contralateral cancer, or death. Kaplan–Meier curves and log-rank tests were computed using <code>survival v3.5.7</code> and plotted with <code>survminer v0.4.9</code>. Multivariable Cox regression included molecular subtype, age at diagnosis (continuous), tumour stage (I–IV), and receptor status as covariates. Proportional hazards assumption was verified using Schoenfeld residuals.
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-trigger" onclick="toggleAcc(this)">
+      GSEA and Pathway Enrichment
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      Gene set enrichment analysis was performed using <code>fgsea v1.26</code> with 10,000 permutations against MSigDB Hallmark (v2023.1) and KEGG (March 2024) gene sets. Genes were ranked by Wald statistic from DESeq2 to preserve both direction and magnitude information. Normalised enrichment scores (NES) ≥ 1.5 or ≤ −1.5 at FDR &lt; 0.25 were reported. For pathway visualisation, leading-edge gene sets were extracted and subjected to network analysis in <code>Cytoscape v3.10</code>.
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-trigger" onclick="toggleAcc(this)">
+      Cloud Computing and Reproducibility
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      All computationally intensive steps (alignment, NMF bootstrapping, GSEA permutation) were executed on the Compute Canada Cedar HPC cluster (2,048-core Slurm environment) and validated on AWS EC2 (r6i.8xlarge). All analysis code is version-controlled at GitHub (jkenrickk/idc-multiomics) under MIT licence. Containerised environments using Docker (Bioconductor 3.17 base image) ensure full computational reproducibility. Pipeline orchestration was managed with <code>Snakemake v7.32</code>. All intermediate outputs and final figures are archived at Zenodo (DOI: 10.5281/zenodo.XXXXXXX).
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">IDC Multi-Omics Study · 2025</div>
+      <p>Epigenomic Dysregulation and Transcriptomic Reprogramming in Invasive Ductal Carcinoma</p>
+    </div>
+    <div>
+      <p><strong style="color:rgba(255,255,255,0.5);">Data Availability</strong></p>
+      <p>RNA-seq data deposited at GEO: <a href="#">GSE000000</a></p>
+      <p>Methylation data: GEO <a href="#">GSE000001</a></p>
+      <p>Code: <a href="#">github.com/jkenrickk/idc-multiomics</a></p>
+    </div>
+    <div>
+      <p><strong style="color:rgba(255,255,255,0.5);">Competing Interests</strong></p>
+      <p>The authors declare no competing financial interests.</p>
+      <p style="margin-top:0.8rem;"><strong style="color:rgba(255,255,255,0.5);">Funding</strong></p>
+      <p>Indonesian Ministry of Education Scholarship</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   DNA HELIX ANIMATION — signature element
+   ============================================================ */
+(function() {
+  const svg = document.getElementById('dnaHelix');
+  const W = 280, H = 380, cx = W/2;
+  const STEPS = 60;
+  const colors = { strand1: '#0EB5A0', strand2: '#E05C5C', rung: 'rgba(255,255,255,0.18)' };
+
+  function helix(t, phase) {
+    const x = cx + 70 * Math.sin(t * Math.PI * 4 + phase);
+    const y = t * H;
+    return { x, y };
+  }
+
+  let frame = 0;
+  function draw() {
+    svg.innerHTML = '';
+
+    // Draw rungs
+    for (let i = 0; i < STEPS; i++) {
+      const t = i / STEPS;
+      const p1 = helix(t, 0);
+      const p2 = helix(t, Math.PI);
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+      line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+      line.setAttribute('stroke', colors.rung);
+      line.setAttribute('stroke-width', 1.5);
+      svg.appendChild(line);
+    }
+
+    // Draw strands
+    for (let strand = 0; strand < 2; strand++) {
+      const phase = strand === 0 ? 0 : Math.PI;
+      let d = '';
+      for (let i = 0; i <= STEPS; i++) {
+        const t = i / STEPS;
+        const pt = helix(t, phase + frame * 0.02);
+        d += (i === 0 ? 'M' : 'L') + pt.x.toFixed(1) + ',' + pt.y.toFixed(1);
+      }
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', d);
+      path.setAttribute('stroke', strand === 0 ? colors.strand1 : colors.strand2);
+      path.setAttribute('stroke-width', 3);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-linecap', 'round');
+      svg.appendChild(path);
+
+      // Dots on strand
+      for (let i = 0; i < STEPS; i += 4) {
+        const t = i / STEPS;
+        const pt = helix(t, phase + frame * 0.02);
+        const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        circle.setAttribute('cx', pt.x); circle.setAttribute('cy', pt.y);
+        circle.setAttribute('r', 3.5);
+        circle.setAttribute('fill', strand === 0 ? colors.strand1 : colors.strand2);
+        svg.appendChild(circle);
+      }
+    }
+    frame++;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ============================================================
+   CHART.JS GLOBAL DEFAULTS
+   ============================================================ */
+Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+Chart.defaults.color = '#4A6580';
+
+const C = {
+  s1: '#8E44AD', s2: '#27AE60', s3: '#E05C5C',
+  ocean: '#1A6B8A', teal: '#0EB5A0', amber: '#F0A500',
+  up: '#E05C5C', down: '#1A6B8A', neutral: '#BDC3C7',
+};
+
+/* ============================================================
+   HELPER: seeded pseudo-random
+   ============================================================ */
+function seededRng(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+
+/* ============================================================
+   STAGE CHART
+   ============================================================ */
+new Chart(document.getElementById('stageChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Stage I', 'Stage II', 'Stage III', 'Stage IV'],
+    datasets: [{ data: [72, 157, 128, 55], backgroundColor: ['#0EB5A0','#1A6B8A','#8E44AD','#E05C5C'], borderWidth: 0, hoverOffset: 6 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 14 } } },
+    cutout: '60%'
+  }
+});
+
+/* ============================================================
+   RECEPTOR CHART
+   ============================================================ */
+new Chart(document.getElementById('receptorChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Luminal A', 'Luminal B', 'HER2-enriched', 'Triple Negative'],
+    datasets: [
+      { label: 'Stage I–II', data: [142, 88, 34, 45], backgroundColor: C.ocean + 'CC', borderRadius: 4 },
+      { label: 'Stage III–IV', data: [36, 28, 24, 15], backgroundColor: C.s3 + 'CC', borderRadius: 4 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 10, padding: 12 } } },
+    scales: { x: { grid: { display: false } }, y: { grid: { color: '#E2EAF2' }, title: { display: true, text: 'n samples' } } }
+  }
+});
+
+/* ============================================================
+   AGE VIOLIN (approximated via line chart)
+   ============================================================ */
+(function(){
+  const rng = seededRng(99);
+  function gaussian(mean, std, n) {
+    return Array.from({length: n}, () => {
+      let u = 0, v = 0;
+      while(u === 0) u = rng(); while(v === 0) v = rng();
+      return mean + std * Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v);
+    }).sort((a,b)=>a-b);
+  }
+  const bins = Array.from({length: 40}, (_,i) => 28 + i*1.5);
+  function density(data, bins) {
+    return bins.map(b => data.filter(d => Math.abs(d-b) < 2.5).length / data.length * 10);
+  }
+  const d1 = gaussian(52, 9, 148), d2 = gaussian(58, 10, 152), d3 = gaussian(63, 11, 112);
+  new Chart(document.getElementById('ageViolinChart'), {
+    type: 'line',
+    data: {
+      labels: bins.map(b => b.toFixed(0)),
+      datasets: [
+        { label: 'IDC-S1', data: density(d1, bins), borderColor: C.s1, backgroundColor: C.s1+'25', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 },
+        { label: 'IDC-S2', data: density(d2, bins), borderColor: C.s2, backgroundColor: C.s2+'25', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 },
+        { label: 'IDC-S3', data: density(d3, bins), borderColor: C.s3, backgroundColor: C.s3+'25', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } },
+      scales: {
+        x: { title: { display: true, text: 'Age at diagnosis' }, grid: { display: false }, ticks: { maxTicksLimit: 8 } },
+        y: { title: { display: true, text: 'Density' }, grid: { color: '#E2EAF2' } }
+      }
+    }
+  });
+})();
+
+/* ============================================================
+   GRADE CHART
+   ============================================================ */
+new Chart(document.getElementById('gradeChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Grade I', 'Grade II', 'Grade III'],
+    datasets: [
+      { label: 'IDC-S1', data: [28, 72, 48], backgroundColor: C.s1+'CC', borderRadius: 4 },
+      { label: 'IDC-S2', data: [22, 68, 62], backgroundColor: C.s2+'CC', borderRadius: 4 },
+      { label: 'IDC-S3', data: [4, 30, 78], backgroundColor: C.s3+'CC', borderRadius: 4 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } },
+    scales: { x: { grid: { display: false } }, y: { grid: { color: '#E2EAF2' }, stacked: false } }
+  }
+});
+
+/* ============================================================
+   VOLCANO CHART
+   ============================================================ */
+(function(){
+  const rng = seededRng(1337);
+  const pts = [];
+  for (let i = 0; i < 600; i++) {
+    const fc = (rng()-0.5)*8;
+    const logp = Math.abs(fc) > 1.5 ? rng()*6+1 : rng()*2;
+    const sig = Math.abs(fc) > 1.5 && logp > 1.3;
+    const dir = sig ? (fc > 0 ? 'up' : 'down') : 'ns';
+    pts.push({ x: fc, y: logp, dir });
+  }
+  const datasets = [
+    { label: 'Upregulated', data: pts.filter(p=>p.dir==='up').map(p=>({x:p.x,y:p.y})), backgroundColor: C.up+'BB', pointRadius: 4 },
+    { label: 'Downregulated', data: pts.filter(p=>p.dir==='down').map(p=>({x:p.x,y:p.y})), backgroundColor: C.down+'BB', pointRadius: 4 },
+    { label: 'NS', data: pts.filter(p=>p.dir==='ns').map(p=>({x:p.x,y:p.y})), backgroundColor: '#BDC3C7AA', pointRadius: 2.5 },
+  ];
+  new Chart(document.getElementById('volcanoChart'), {
+    type: 'scatter', data: { datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10 } },
+        annotation: {} },
+      scales: {
+        x: { title: { display: true, text: 'log₂ Fold Change (IDC / Normal)' }, grid: { color: '#E2EAF2' } },
+        y: { title: { display: true, text: '−log₁₀(adjusted p-value)' }, grid: { color: '#E2EAF2' } }
+      }
+    }
+  });
+})();
+
+/* ============================================================
+   MA CHART
+   ============================================================ */
+(function(){
+  const rng = seededRng(2024);
+  const pts = [];
+  for (let i = 0; i < 600; i++) {
+    const a = rng()*12 + 1;
+    const m = (rng()-0.5)*6 * (1 - a/18);
+    const sig = Math.abs(m) > 1.5 && a > 4;
+    pts.push({ x: a, y: m, sig });
+  }
+  new Chart(document.getElementById('maChart'), {
+    type: 'scatter',
+    data: { datasets: [
+      { label: 'Significant', data: pts.filter(p=>p.sig).map(p=>({x:p.x,y:p.y})), backgroundColor: C.ocean+'BB', pointRadius: 4 },
+      { label: 'Not significant', data: pts.filter(p=>!p.sig).map(p=>({x:p.x,y:p.y})), backgroundColor: '#BDC3C7AA', pointRadius: 2.5 },
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } },
+      scales: {
+        x: { title: { display: true, text: 'A = Mean log₂ Expression' }, grid: { color: '#E2EAF2' } },
+        y: { title: { display: true, text: 'M = log₂ Fold Change' }, grid: { color: '#E2EAF2' } }
+      }
+    }
+  });
+})();
+
+/* ============================================================
+   TOP UP / DOWN GENE CHARTS
+   ============================================================ */
+const upGenes = ['MKI67','TOP2A','ERBB2','CCND1','AURKA','BIRC5','PLK1','CDK1','FOXM1','MYBL2','UBE2C','RRM2','MCM2','PCNA','CDC20'];
+const upFC = [4.8,4.5,4.2,3.9,3.7,3.5,3.3,3.1,3.0,2.9,2.8,2.7,2.6,2.5,2.4];
+new Chart(document.getElementById('topUpChart'), {
+  type: 'bar',
+  data: {
+    labels: upGenes,
+    datasets: [{ data: upFC, backgroundColor: upFC.map(v => `rgba(224,92,92,${0.4 + v/12})`), borderRadius: 4, borderSkipped: false }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { title: { display: true, text: 'log₂FC' }, grid: { color: '#E2EAF2' } },
+      y: { grid: { display: false }, ticks: { font: { family: "'IBM Plex Mono'" , size: 10 } } }
+    }
+  }
+});
+
+const downGenes = ['ESR1','PGR','GATA3','FOXA1','TFF1','CITED1','AGR2','AR','SCUBE2','RERG','BCL2','KRT18','ERBB3','PRLR','ABCA8'];
+const downFC = [-3.9,-3.7,-3.5,-3.3,-3.1,-2.9,-2.8,-2.7,-2.6,-2.5,-2.4,-2.3,-2.2,-2.1,-2.0];
+new Chart(document.getElementById('topDownChart'), {
+  type: 'bar',
+  data: {
+    labels: downGenes,
+    datasets: [{ data: downFC, backgroundColor: downFC.map(v => `rgba(26,107,138,${0.4 + Math.abs(v)/9})`), borderRadius: 4, borderSkipped: false }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { title: { display: true, text: 'log₂FC' }, grid: { color: '#E2EAF2' } },
+      y: { grid: { display: false }, ticks: { font: { family: "'IBM Plex Mono'", size: 10 } } }
+    }
+  }
+});
+
+/* ============================================================
+   CHROMOSOME DISTRIBUTION
+   ============================================================ */
+const chroms = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X'];
+const chromDE = [182,148,124,88,102,96,110,74,62,70,134,98,44,52,58,88,142,36,108,62,28,44,86];
+new Chart(document.getElementById('chromChart'), {
+  type: 'bar',
+  data: {
+    labels: chroms,
+    datasets: [{ data: chromDE, backgroundColor: chromDE.map((v,i) => i===16 ? C.s3 : C.ocean+'99'), borderRadius: 3 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' DE genes' } } },
+    scales: {
+      x: { title: { display: true, text: 'Chromosome' }, grid: { display: false } },
+      y: { title: { display: true, text: 'DE genes (n)' }, grid: { color: '#E2EAF2' } }
+    }
+  }
+});
+
+/* ============================================================
+   METHYLATION DISTRIBUTION
+   ============================================================ */
+(function(){
+  const rng = seededRng(42);
+  function betaSample(a, b, n) {
+    return Array.from({length:n}, () => {
+      let x = 0, y = 0;
+      while(x===0){ x = rng(); y = rng(); }
+      const u = Math.pow(x, 1/a), v = Math.pow(y, 1/b);
+      return u/(u+v);
+    });
+  }
+  const bins = Array.from({length:50}, (_,i) => i/50);
+  function histDensity(data, bins) {
+    const w = bins[1]-bins[0];
+    return bins.map(b => data.filter(d => d>=b && d<b+w).length/(data.length*w));
+  }
+  const norm = betaSample(1.5,6,500);
+  const tum = [...betaSample(1.5,4,350), ...betaSample(4,1.5,150)];
+  new Chart(document.getElementById('methylDist'), {
+    type: 'line',
+    data: {
+      labels: bins.map(b => b.toFixed(2)),
+      datasets: [
+        { label: 'Normal', data: histDensity(norm, bins), borderColor: C.ocean, backgroundColor: C.ocean+'20', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 },
+        { label: 'IDC Tumour', data: histDensity(tum, bins), borderColor: C.s3, backgroundColor: C.s3+'20', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } },
+      scales: {
+        x: { title: { display: true, text: 'Beta Value (methylation level)' }, grid: { display: false }, ticks: { maxTicksLimit: 6 } },
+        y: { title: { display: true, text: 'Density' }, grid: { color: '#E2EAF2' } }
+      }
+    }
+  });
+})();
+
+/* ============================================================
+   METHYLATION vs EXPRESSION SCATTER
+   ============================================================ */
+(function(){
+  const rng = seededRng(777);
+  const pts = Array.from({length:300}, () => {
+    const db = (rng()-0.4)*0.8;
+    const expr = -db * 3.5 + (rng()-0.5)*2;
+    const sig = Math.abs(db)>0.15 && Math.abs(expr)>1;
+    return { x: db, y: expr, sig };
+  });
+  new Chart(document.getElementById('methExprScatter'), {
+    type: 'scatter',
+    data: { datasets: [
+      { label: 'Significant DMS-gene pair', data: pts.filter(p=>p.sig).map(p=>({x:p.x,y:p.y})), backgroundColor: C.s3+'BB', pointRadius: 5 },
+      { label: 'Not significant', data: pts.filter(p=>!p.sig).map(p=>({x:p.x,y:p.y})), backgroundColor: '#BDC3C7AA', pointRadius: 3 },
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } },
+      scales: {
+        x: { title: { display: true, text: 'Δβ (Tumour − Normal)' }, grid: { color: '#E2EAF2' } },
+        y: { title: { display: true, text: 'log₂ Fold Change' }, grid: { color: '#E2EAF2' } }
+      }
+    }
+  });
+})();
+
+/* ============================================================
+   DMS GENOMIC CONTEXT
+   ============================================================ */
+new Chart(document.getElementById('dmsContext'), {
+  type: 'bar',
+  data: {
+    labels: ["CpG Island\nPromoter","CpG Shore","Gene Body","Intergenic","3' UTR","Enhancer"],
+    datasets: [
+      { label: 'Hypermethylated', data: [312, 142, 88, 56, 34, 78], backgroundColor: C.s3+'CC', borderRadius: 4 },
+      { label: 'Hypomethylated', data: [44, 188, 224, 138, 92, 56], backgroundColor: C.ocean+'CC', borderRadius: 4 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { title: { display: true, text: 'Number of DMS' }, grid: { color: '#E2EAF2' } }
+    }
+  }
+});
+
+/* ============================================================
+   METHYLATION HEATMAP (canvas drawn)
+   ============================================================ */
+(function(){
+  const canvas = document.getElementById('heatmapCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth || 500;
+  canvas.height = 340;
+
+  const rng = seededRng(555);
+  const nGenes = 20, nSamples = 40;
+  const data = Array.from({length: nGenes}, (_, gi) =>
+    Array.from({length: nSamples}, (_, si) => {
+      const subtype = si < 15 ? 0 : si < 28 ? 1 : 2;
+      let base = rng();
+      if (gi < 7 && subtype === 2) base = Math.min(1, base + 0.6);
+      if (gi >= 13 && subtype === 0) base = Math.max(0, base - 0.4);
+      return base * 2 - 1;
+    })
+  );
+
+  const geneLabels = ['BRCA1','MLH1','CDKN2A','RASSF1','APC','CDH1','DAPK1','MGMT','ESR1','PGR','GATA3','FOXA1','TFF1','BCL2','MKI67','TOP2A','CCND1','AURKA','ERBB2','CDK1'];
+  const cellW = canvas.width / nSamples;
+  const cellH = 260 / nGenes;
+  const labelW = 72;
+  const offsetX = labelW;
+
+  function heatColor(v) {
+    if (v > 0) {
+      const t = Math.min(v, 1);
+      return `rgba(224,92,92,${0.15 + t*0.85})`;
+    } else {
+      const t = Math.min(-v, 1);
+      return `rgba(26,107,138,${0.15 + t*0.85})`;
+    }
+  }
+
+  const drawW = canvas.width - offsetX;
+  const cw = drawW / nSamples;
+
+  // Subtype labels at top
+  ctx.fillStyle = '#8E44AD';
+  ctx.fillRect(offsetX, 0, cw*15, 14);
+  ctx.fillStyle = '#27AE60';
+  ctx.fillRect(offsetX + cw*15, 0, cw*13, 14);
+  ctx.fillStyle = '#E05C5C';
+  ctx.fillRect(offsetX + cw*28, 0, cw*12, 14);
+  ctx.fillStyle = 'white';
+  ctx.font = '9px IBM Plex Sans';
+  ctx.fillText('IDC-S1', offsetX + 2, 11);
+  ctx.fillText('IDC-S2', offsetX + cw*15 + 2, 11);
+  ctx.fillText('IDC-S3', offsetX + cw*28 + 2, 11);
+
+  // Cells
+  for (let gi = 0; gi < nGenes; gi++) {
+    for (let si = 0; si < nSamples; si++) {
+      ctx.fillStyle = heatColor(data[gi][si]);
+      ctx.fillRect(offsetX + si*cw + 0.5, 18 + gi*cellH + 0.5, cw - 1, cellH - 1);
+    }
+  }
+
+  // Gene labels
+  ctx.fillStyle = '#1A2E42';
+  ctx.font = '9px IBM Plex Mono';
+  ctx.textAlign = 'right';
+  for (let gi = 0; gi < nGenes; gi++) {
+    ctx.fillText(geneLabels[gi], offsetX - 4, 18 + gi*cellH + cellH/2 + 3);
+  }
+
+  // Color scale legend
+  const legendY = 18 + nGenes*cellH + 12;
+  const gradW = 120, gradX = canvas.width - gradW - 20;
+  const grad = ctx.createLinearGradient(gradX, 0, gradX+gradW, 0);
+  grad.addColorStop(0, 'rgba(26,107,138,1)');
+  grad.addColorStop(0.5, 'rgba(240,244,248,1)');
+  grad.addColorStop(1, 'rgba(224,92,92,1)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(gradX, legendY, gradW, 10);
+  ctx.strokeStyle = '#ccc';
+  ctx.strokeRect(gradX, legendY, gradW, 10);
+  ctx.fillStyle = '#4A6580';
+  ctx.font = '9px IBM Plex Sans';
+  ctx.textAlign = 'left';
+  ctx.fillText('−1 (hypo)', gradX, legendY + 22);
+  ctx.textAlign = 'right';
+  ctx.fillText('+1 (hyper)', gradX + gradW, legendY + 22);
+  ctx.textAlign = 'center';
+  ctx.fillText('Z-score β', gradX + gradW/2, legendY + 22);
+})();
+
+/* ============================================================
+   KAPLAN–MEIER SURVIVAL CHART
+   ============================================================ */
+function kmCurve(scale, maxT, steps) {
+  const rng2 = seededRng(scale * 7);
+  let s = 1.0, pts = [{x:0,y:1}];
+  const dt = maxT/steps;
+  for (let i = 1; i <= steps; i++) {
+    const t = i*dt;
+    const h = dt/scale * (1 + rng2()*0.15 - 0.075);
+    s *= Math.exp(-h);
+    pts.push({x: parseFloat(t.toFixed(1)), y: parseFloat(Math.max(0,s).toFixed(3))});
+  }
+  return pts;
+}
+
+const survOS = {
+  s1: kmCurve(74, 96, 48),
+  s2: kmCurve(55, 96, 48),
+  s3: kmCurve(28, 96, 48),
+};
+const survDFS = {
+  s1: kmCurve(60, 96, 48),
+  s2: kmCurve(42, 96, 48),
+  s3: kmCurve(20, 96, 48),
+};
+
+let survChart = new Chart(document.getElementById('survivalChart'), {
+  type: 'line',
+  data: {
+    datasets: [
+      { label: 'IDC-S1', data: survOS.s1, borderColor: C.s1, backgroundColor: 'transparent', stepped: 'before', borderWidth: 2.5, pointRadius: 0 },
+      { label: 'IDC-S2', data: survOS.s2, borderColor: C.s2, backgroundColor: 'transparent', stepped: 'before', borderWidth: 2.5, pointRadius: 0 },
+      { label: 'IDC-S3', data: survOS.s3, borderColor: C.s3, backgroundColor: 'transparent', stepped: 'before', borderWidth: 2.5, pointRadius: 0 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    parsing: false,
+    plugins: {
+      legend: { position: 'top', labels: { boxWidth: 22, padding: 14 } },
+      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: S(t) = ${ctx.parsed.y.toFixed(3)}` } }
+    },
+    scales: {
+      x: { type: 'linear', title: { display: true, text: 'Time (months)' }, min: 0, max: 96, grid: { color: '#E2EAF2' } },
+      y: { title: { display: true, text: 'Survival Probability' }, min: 0, max: 1, grid: { color: '#E2EAF2' } }
+    }
+  }
+});
+
+function switchSurvival(type, btn) {
+  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const d = type === 'os' ? survOS : survDFS;
+  survChart.data.datasets[0].data = d.s1;
+  survChart.data.datasets[1].data = d.s2;
+  survChart.data.datasets[2].data = d.s3;
+  document.getElementById('survTitle').textContent = type === 'os' ? 'Kaplan–Meier Overall Survival Curves' : 'Kaplan–Meier Disease-Free Survival Curves';
+  document.getElementById('survAnnotation').textContent = type === 'os'
+    ? 'IDC-S3 demonstrates significantly inferior overall survival (median OS = 28 months) compared to IDC-S1 (median OS = 74 months) and IDC-S2 (median OS = 55 months).'
+    : 'Disease-free survival divergence is most pronounced in the first 18 months, with IDC-S3 showing a DFS event rate of 62% by 24 months vs 28% for IDC-S1.';
+  survChart.update();
+}
+
+/* ============================================================
+   SUBTYPE BAR
+   ============================================================ */
+new Chart(document.getElementById('subtypeBar'), {
+  type: 'bar',
+  data: {
+    labels: ['IDC-S1', 'IDC-S2', 'IDC-S3'],
+    datasets: [
+      { label: 'n Samples', data: [148, 152, 112], backgroundColor: [C.s1+'CC', C.s2+'CC', C.s3+'CC'], borderRadius: 6 },
+      { label: '5yr OS %', data: [68, 52, 31], backgroundColor: [C.s1+'44', C.s2+'44', C.s3+'44'], borderRadius: 6 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } },
+    scales: { x: { grid: { display: false } }, y: { grid: { color: '#E2EAF2' } } }
+  }
+});
+
+/* ============================================================
+   GSEA ENRICHMENT CURVES
+   ============================================================ */
+function gseaCurve(nes, seed) {
+  const rng = seededRng(seed);
+  const n = 60;
+  const pts = [0];
+  for (let i = 1; i < n; i++) {
+    const step = (i < n*0.4 ? nes*0.07 : -nes*0.025) + (rng()-0.5)*0.04;
+    pts.push(pts[pts.length-1] + step);
+  }
+  return pts;
+}
+
+new Chart(document.getElementById('gseaChart1'), {
+  type: 'line',
+  data: {
+    labels: Array.from({length:60},(_,i)=>i),
+    datasets: [{ label: 'Running ES', data: gseaCurve(2.31, 11), borderColor: C.teal, backgroundColor: C.teal+'18', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 0 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { title: { display: true, text: 'Gene Rank' }, grid: { display: false } },
+      y: { title: { display: true, text: 'Enrichment Score' }, grid: { color: '#E2EAF2' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('gseaChart2'), {
+  type: 'line',
+  data: {
+    labels: Array.from({length:60},(_,i)=>i),
+    datasets: [{ label: 'Running ES', data: gseaCurve(1.87, 99), borderColor: C.s1, backgroundColor: C.s1+'18', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 0 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { title: { display: true, text: 'Gene Rank' }, grid: { display: false } },
+      y: { title: { display: true, text: 'Enrichment Score' }, grid: { color: '#E2EAF2' } }
+    }
+  }
+});
+
+/* ============================================================
+   NES HEATMAP (simulated)
+   ============================================================ */
+(function(){
+  const pathways = ['E2F Targets','G2M Checkpoint','Myc Targets','PI3K/AKT','IFN-γ Response','TNFα/NF-κB','DNA Repair','Oxidative Phos.','p53 Pathway','Hypoxia'];
+  const nesData = {
+    s1: [1.2, 1.4, 1.0, 0.8, 2.1, 1.8, 0.6, 1.1, 0.7, 0.5],
+    s2: [1.8, 1.9, 1.6, 1.4, 1.2, 1.0, 1.1, 1.5, 1.3, 1.2],
+    s3: [2.4, 2.3, 2.1, 1.9, -0.4, 0.3, -1.2, 2.0, -0.8, 1.7],
+  };
+  new Chart(document.getElementById('nesHeatmap'), {
+    type: 'bar',
+    data: {
+      labels: pathways,
+      datasets: [
+        { label: 'IDC-S1', data: nesData.s1, backgroundColor: C.s1+'BB', borderRadius: 3 },
+        { label: 'IDC-S2', data: nesData.s2, backgroundColor: C.s2+'BB', borderRadius: 3 },
+        { label: 'IDC-S3', data: nesData.s3, backgroundColor: nesData.s3.map(v => v < 0 ? C.down+'BB' : C.s3+'BB'), borderRadius: 3 },
+      ]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } },
+      scales: {
+        x: { title: { display: true, text: 'NES' }, grid: { color: '#E2EAF2' } },
+        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+})();
+
+/* ============================================================
+   MUTATION SIGNATURE CHART
+   ============================================================ */
+new Chart(document.getElementById('sigChart'), {
+  type: 'bar',
+  data: {
+    labels: ['IDC-S1', 'IDC-S2', 'IDC-S3'],
+    datasets: [
+      { label: 'SBS1 (Aging)', data: [0.28, 0.26, 0.18], backgroundColor: C.ocean+'CC', borderRadius: 4, borderSkipped: false },
+      { label: 'SBS3 (HRD)', data: [0.18, 0.28, 0.48], backgroundColor: C.s3+'CC', borderRadius: 4, borderSkipped: false },
+      { label: 'SBS5 (Clock)', data: [0.30, 0.26, 0.22], backgroundColor: C.amber+'CC', borderRadius: 4, borderSkipped: false },
+      { label: 'SBS13 (APOBEC)', data: [0.24, 0.20, 0.12], backgroundColor: C.s1+'CC', borderRadius: 4, borderSkipped: false },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, title: { display: true, text: 'Signature Proportion' }, grid: { color: '#E2EAF2' }, max: 1 }
+    }
+  }
+});
+
+/* ============================================================
+   PATHWAY TABLE
+   ============================================================ */
+const pathwayData = [
+  { name: 'E2F Targets',          nes: 2.31, fdr: 0.002, dir: 'up'   },
+  { name: 'G2M Checkpoint',       nes: 2.28, fdr: 0.002, dir: 'up'   },
+  { name: 'Myc Targets V1',       nes: 2.11, fdr: 0.003, dir: 'up'   },
+  { name: 'Mitotic Spindle',      nes: 2.08, fdr: 0.004, dir: 'up'   },
+  { name: 'DNA Repair',           nes: -1.92, fdr: 0.006, dir: 'down' },
+  { name: 'IFN-γ Response',       nes: 1.87, fdr: 0.018, dir: 'up'   },
+  { name: 'PI3K/AKT Signaling',   nes: 1.82, fdr: 0.022, dir: 'up'   },
+  { name: 'Apoptosis',            nes: -1.78, fdr: 0.025, dir: 'down' },
+  { name: 'TNFα via NF-κB',       nes: 1.74, fdr: 0.031, dir: 'up'   },
+  { name: 'Hypoxia',              nes: 1.68, fdr: 0.044, dir: 'up'   },
+  { name: 'IL-2/STAT5 Signal.',   nes: -1.65, fdr: 0.048, dir: 'down' },
+  { name: 'p53 Pathway',          nes: -1.62, fdr: 0.055, dir: 'down' },
+  { name: 'Epithelial-Mesenchymal', nes: 1.59, fdr: 0.072, dir: 'up' },
+  { name: 'Oxid. Phosphorylation', nes: 1.55, fdr: 0.098, dir: 'up'  },
+  { name: 'Coagulation',          nes: -1.52, fdr: 0.112, dir: 'down' },
+];
+
+const tbody = document.getElementById('pathwayTableBody');
+pathwayData.forEach(p => {
+  const w = Math.min(Math.abs(p.nes)/2.5*100, 100);
+  tbody.innerHTML += `
+  <tr>
+    <td>${p.name}</td>
+    <td style="font-family:'IBM Plex Mono';font-size:0.82rem;color:${p.nes>0?'#E05C5C':'#1A6B8A'}">${p.nes > 0 ? '+' : ''}${p.nes.toFixed(2)}</td>
+    <td style="font-family:'IBM Plex Mono';font-size:0.8rem">${p.fdr.toFixed(3)}</td>
+    <td><span class="badge-sig ${p.dir==='up'?'up':'down'}">${p.dir==='up'?'Enriched':'Depleted'}</span></td>
+    <td><div class="bar-inline"><div class="bar-bg"><div class="bar-fill" style="width:${w}%"></div></div><span style="font-size:0.75rem;color:var(--text-muted);font-family:'IBM Plex Mono'">${Math.abs(p.nes).toFixed(2)}</span></div></td>
+  </tr>`;
+});
+
+/* ============================================================
+   ACCORDION
+   ============================================================ */
+function toggleAcc(btn) {
+  const body = btn.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.acc-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.acc-trigger').forEach(b => b.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); btn.classList.add('open'); }
+}
+
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+</script>
+</body>
+</html>
